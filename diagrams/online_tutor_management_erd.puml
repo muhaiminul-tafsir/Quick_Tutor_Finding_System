@@ -1,0 +1,126 @@
+@startuml Online_Tutor_Management_System_ERD
+!define TABLENAME(name) class name << (T,#FFD700) >>
+!define PRIMARY_KEY {id : PK}
+!define FOREIGN_KEY(field) field : FK
+
+title Online Tutor Management System - Entity Relationship Diagram
+note top : Comprehensive database schema for online tutoring platform
+
+' ===== USER ENTITY =====
+entity User {
+    **id** : IntegerField [PK]
+    --
+    username : CharField(150) [UNIQUE, NOT NULL]
+    password : CharField(128) [NOT NULL]
+    email : EmailField [NOT NULL]
+    first_name : CharField(30)
+    last_name : CharField(150)
+    role : CharField(10) [CHOICES: 'student', 'tutor']
+    is_active : BooleanField [DEFAULT: True]
+    is_staff : BooleanField [DEFAULT: False]
+    date_joined : DateTimeField [AUTO_NOW_ADD]
+    last_login : DateTimeField [NULL]
+}
+
+' ===== TUTOR PROFILE ENTITY =====
+entity TutorProfile {
+    **id** : IntegerField [PK]
+    --
+    **user_id** : OneToOneField [FK → User, CASCADE]
+    subject : CharField(100) [NOT NULL]
+    bio : TextField [NOT NULL]
+    rating : FloatField [DEFAULT: 0.0]
+    created_at : DateTimeField [AUTO_NOW_ADD]
+    updated_at : DateTimeField [AUTO_NOW]
+}
+
+' ===== BOOKING ENTITY =====
+entity Booking {
+    **id** : IntegerField [PK]
+    --
+    **student_id** : ForeignKey [FK → User, CASCADE, RELATED: 'student_bookings']
+    **tutor_id** : ForeignKey [FK → User, CASCADE, RELATED: 'tutor_bookings']
+    date : DateField [NOT NULL]
+    time : TimeField [NOT NULL]
+    status : CharField(10) [CHOICES: 'pending', 'confirmed', 'completed', 'rejected']
+    duration : IntegerField [NULLABLE, In minutes]
+    notes : TextField [NULLABLE]
+    created_at : DateTimeField [AUTO_NOW_ADD]
+    updated_at : DateTimeField [AUTO_NOW]
+}
+
+' ===== PAYMENT ENTITY =====
+entity Payment {
+    **id** : IntegerField [PK]
+    --
+    **booking_id** : OneToOneField [FK → Booking, CASCADE, RELATED: 'payment']
+    amount : DecimalField(10, 2) [NOT NULL]
+    currency : CharField(3) [DEFAULT: 'USD']
+    status : CharField(10) [CHOICES: 'pending', 'completed', 'failed']
+    payment_method : CharField(20) [NULLABLE]
+    transaction_id : CharField(100) [NULLABLE, UNIQUE]
+    created_at : DateTimeField [AUTO_NOW_ADD]
+    updated_at : DateTimeField [AUTO_NOW]
+}
+
+' ===== REVIEW ENTITY =====
+entity Review {
+    **id** : IntegerField [PK]
+    --
+    **booking_id** : OneToOneField [FK → Booking, CASCADE, RELATED: 'review']
+    rating : IntegerField [CHOICES: 1-5, NOT NULL]
+    comment : TextField [NOT NULL]
+    is_verified : BooleanField [DEFAULT: False]
+    created_at : DateTimeField [AUTO_NOW_ADD]
+    updated_at : DateTimeField [AUTO_NOW]
+}
+
+' ===== RELATIONSHIPS =====
+User ||--o{ Booking : "student_bookings"
+User ||--o{ Booking : "tutor_bookings"
+User ||--|| TutorProfile : "has\n(one-to-one)"
+Booking ||--|| Payment : "payment\n(one-to-one)"
+Booking ||--|| Review : "review\n(one-to-one)"
+
+' ===== NOTES =====
+note right of User
+    Base user model extending Django's AbstractUser
+    Supports dual roles: Student and Tutor
+    Each user can be either a student or tutor
+end note
+
+note right of TutorProfile
+    Extended profile for tutor users only
+    Contains subject expertise and rating information
+    Linked to User via one-to-one relationship
+end note
+
+note right of Booking
+    Represents a tutoring session booking
+    Links student and tutor
+    Tracks session status throughout lifecycle
+end note
+
+note right of Payment
+    Financial transaction record
+    Connected to specific booking
+    Tracks payment status and method
+end note
+
+note right of Review
+    Student feedback after session completion
+    One review per booking
+    Includes rating (1-5) and written comment
+end note
+
+' ===== LEGEND =====
+legend right
+    | Type | Notation |
+    | Primary Key | **id** |
+    | Foreign Key | **field_id** |
+    | One-to-One | \|\|--\|\| |
+    | One-to-Many | \|\|--o{ |
+    | Timestamps | created_at, updated_at |
+end legend
+
+@enduml

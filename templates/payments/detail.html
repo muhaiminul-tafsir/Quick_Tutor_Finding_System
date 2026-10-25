@@ -1,0 +1,108 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Payment Details - Online Tutor Management System{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2>Payment #{{ payment.id }}</h2>
+            <span class="status status-{{ payment.status }}" style="font-size: 14px;">
+                {{ payment.get_status_display }}
+            </span>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;">
+        <div>
+            <h4 style="margin-bottom: 15px; color: #333;">Payment Information</h4>
+            <div style="background-color: #f9f9f9; padding: 20px; border-radius: 8px;">
+                <table style="width: 100%; margin: 0;">
+                    <tr>
+                        <td style="font-weight: 600; padding: 8px 0; border: none;">Payment ID:</td>
+                        <td style="padding: 8px 0; border: none;">#{{ payment.id }}</td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: 600; padding: 8px 0; border: none;">Method:</td>
+                        <td style="padding: 8px 0; border: none;"><strong>{{ payment.get_payment_method_display }}</strong></td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: 600; padding: 8px 0; border: none;">Amount:</td>
+                        <td style="padding: 8px 0; border: none; font-size: 18px; color: #667eea;">BDT {{ payment.amount }}</td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: 600; padding: 8px 0; border: none;">Sender No.:</td>
+                        <td style="padding: 8px 0; border: none;">{{ payment.sender_number|default:"—" }}</td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: 600; padding: 8px 0; border: none;">Transaction ID:</td>
+                        <td style="padding: 8px 0; border: none; word-break: break-all; font-family: monospace; font-size: 13px;">{{ payment.transaction_id|default:"—" }}</td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: 600; padding: 8px 0; border: none;">Status:</td>
+                        <td style="padding: 8px 0; border: none;">
+                            <span class="status status-{{ payment.status }}">
+                                {{ payment.get_status_display }}
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: 600; padding: 8px 0; border: none;">Submitted:</td>
+                        <td style="padding: 8px 0; border: none;">{{ payment.created_at|date:'M d, Y H:i' }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div>
+            <h4 style="margin-bottom: 15px; color: #333;">Booking Details</h4>
+            <div style="background-color: #f9f9f9; padding: 20px; border-radius: 8px;">
+                <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                    <div class="user-avatar" style="width: 60px; height: 60px; font-size: 24px; margin-right: 15px;">
+                        {% if user.role == 'student' %}
+                            {{ payment.booking.tutor.username|upper|first }}
+                        {% else %}
+                            {{ payment.booking.student.username|upper|first }}
+                        {% endif %}
+                    </div>
+                    <div>
+                        <div style="font-weight: 600; font-size: 16px;">
+                            {% if user.role == 'student' %}
+                                {{ payment.booking.tutor.get_full_name|default:payment.booking.tutor.username }}
+                            {% else %}
+                                {{ payment.booking.student.get_full_name|default:payment.booking.student.username }}
+                            {% endif %}
+                        </div>
+                        {% if payment.booking.tutor.tutor_profile %}
+                            <div style="color: #667eea; font-size: 14px;">{{ payment.booking.tutor.tutor_profile.subject }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <table style="width: 100%; margin: 0;">
+                    <tr>
+                        <td style="font-weight: 600; padding: 8px 0; border: none;">Booking ID:</td>
+                        <td style="padding: 8px 0; border: none;">#{{ payment.booking.id }}</td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: 600; padding: 8px 0; border: none;">Date:</td>
+                        <td style="padding: 8px 0; border: none;">{{ payment.booking.date|date:'M d, Y' }}</td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: 600; padding: 8px 0; border: none;">Duration:</td>
+                        <td style="padding: 8px 0; border: none;">{{ payment.booking.months }} month{% if payment.booking.months > 1 %}s{% endif %}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+
+    <div style="display: flex; gap: 10px;">
+        <a href="/payments/" class="btn btn-secondary">Back to Payments</a>
+        <a href="/bookings/{{ payment.booking.id }}/" class="btn btn-secondary">View Booking</a>
+    </div>
+</div>
+{% endblock %}
+

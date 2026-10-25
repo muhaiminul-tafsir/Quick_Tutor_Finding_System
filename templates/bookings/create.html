@@ -1,0 +1,159 @@
+{% extends 'base/luminary_base.html' %}
+{% block title %}Book Session | QuickTutor{% endblock %}
+{% block page_title %}Book Session{% endblock %}
+{% block nav_bookings %}bg-white text-indigo-700 shadow-sm{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+  <div class="mb-6">
+    <h2 class="text-2xl font-black text-on-surface">Book a Session</h2>
+    <p class="text-sm text-on-muted mt-1">Select your preferred tutor and duration to get started.</p>
+  </div>
+
+  <div class="bg-white rounded-3xl border border-outline/10 shadow-sm overflow-hidden">
+    <div class="h-2 grad"></div>
+    <div class="p-8">
+      <form method="POST" action="" class="space-y-6" id="booking-form">
+        {% csrf_token %}
+        
+        <!-- Tutor select -->
+        <div>
+          <label class="block text-xs font-bold text-on-muted uppercase tracking-wider mb-2">Select Tutor</label>
+          <div class="relative">
+            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg">person_raised_hand</span>
+            <select name="tutor" id="tutor-select" required class="w-full pl-11 pr-4 py-3 bg-surface-low border-2 border-outline/30 rounded-xl text-sm font-medium focus:border-indigo-500 focus:bg-white transition-all outline-none appearance-none cursor-pointer">
+              <option value="" disabled {% if not selected_tutor_id %}selected{% endif %}>Choose a tutor...</option>
+              {% for tutor in tutors %}
+                <option value="{{ tutor.id }}" {% if selected_tutor_id == tutor.id|stringformat:"i" %}selected{% endif %}>
+                  {{ tutor.get_full_name|default:tutor.username }}
+                  {% if tutor.tutor_profile %}— ৳{{ tutor.tutor_profile.monthly_rate }}/mo{% endif %}
+                </option>
+              {% endfor %}
+            </select>
+            <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">expand_more</span>
+          </div>
+        </div>
+
+        <!-- Schedule slot select (dynamic) -->
+        <div id="schedule-wrapper">
+          <label class="block text-xs font-bold text-on-muted uppercase tracking-wider mb-2">Session Schedule</label>
+          <div class="relative">
+            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg">schedule</span>
+            <select name="schedule" id="schedule-select" class="w-full pl-11 pr-4 py-3 bg-surface-low border-2 border-outline/30 rounded-xl text-sm font-medium focus:border-indigo-500 focus:bg-white transition-all outline-none appearance-none cursor-pointer">
+              <option value="">— Select a tutor first —</option>
+            </select>
+            <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">expand_more</span>
+          </div>
+          <p id="schedule-note" class="text-xs text-on-muted mt-2 hidden">Only available (unbooked) slots are shown.</p>
+          <p id="schedule-none" class="text-xs text-amber-600 font-semibold mt-2 hidden">⚠ This tutor has no available schedule slots yet.</p>
+        </div>
+
+        <!-- Hidden months — auto-set from selected schedule slot -->
+        <input type="hidden" name="months" id="months-input" value="1">
+
+        <!-- Live Cost Preview (shown after selecting a slot) -->
+        <div id="cost-preview" class="bg-indigo-50 border border-indigo-100 rounded-2xl p-4 hidden">
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-on-muted font-medium flex items-center gap-2">
+              <span class="material-symbols-outlined text-indigo-400 text-base">payments</span>
+              Estimated Total
+            </span>
+            <span id="cost-value" class="font-black text-indigo-700 text-lg">৳0</span>
+          </div>
+          <p id="cost-breakdown" class="text-xs text-on-muted mt-1"></p>
+        </div>
+
+        <button type="submit" class="w-full py-4 grad text-white font-black rounded-xl text-base hover:opacity-90 transition-all shadow-lg shadow-primary/30 active:scale-95 mt-4">
+          Proceed to Payment →
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+const scheduleMap = {{ schedule_map_json|safe }};
+const rateMap     = {{ tutor_rates_json|safe }};
+
+const tutorSelect    = document.getElementById('tutor-select');
+const scheduleSelect = document.getElementById('schedule-select');
+const scheduleNote   = document.getElementById('schedule-note');
+const scheduleNone   = document.getElementById('schedule-none');
+const monthsInput    = document.getElementById('months-input');
+const costPreview    = document.getElementById('cost-preview');
+const costValue      = document.getElementById('cost-value');
+const costBreakdown  = document.getElementById('cost-breakdown');
+
+/* ── Update cost preview ────────────────────────────────────────── */
+function updateCost() {
+  const tid    = tutorSelect.value;
+  const months = parseInt(monthsInput.value) || 1;
+  const rate   = rateMap[tid];
+  if (!tid || !rate || months < 1) { costPreview.classList.add('hidden'); return; }
+  const total = rate * months;
+  costPreview.classList.remove('hidden');
+  costValue.textContent     = '\u09F3' + total.toLocaleString();
+  costBreakdown.textContent = '\u09F3' + rate.toLocaleString() + '/mo \u00D7 ' + months + ' month' + (months > 1 ? 's' : '');
+}
+
+/* ── When schedule slot changes, auto-set months ───────────────── */
+function onScheduleChange() {
+  const tid   = tutorSelect.value;
+  const slots = scheduleMap[tid] || [];
+  const selId = scheduleSelect.value;
+
+  if (selId) {
+    // Find the selected slot and read its months
+    const slot = slots.find(s => String(s.id) === String(selId));
+    if (slot) { monthsInput.value = slot.months; }
+  } else {
+    // "Any slot" or no selection — use first slot's months, or 1
+    const first = slots[0];
+    monthsInput.value = first ? first.months : 1;
+  }
+  updateCost();
+}
+
+/* ── When tutor changes, rebuild schedule dropdown ─────────────── */
+function updateSchedule() {
+  const tid   = tutorSelect.value;
+  const slots = scheduleMap[tid] || [];
+  scheduleSelect.innerHTML = '';
+
+  if (!tid) {
+    scheduleSelect.innerHTML = '<option value="">— Select a tutor first —</option>';
+    scheduleNote.classList.add('hidden');
+    scheduleNone.classList.add('hidden');
+    costPreview.classList.add('hidden');
+    monthsInput.value = 1;
+    return;
+  }
+
+  if (slots.length === 0) {
+    scheduleSelect.innerHTML = '<option value="">No available slots</option>';
+    scheduleNote.classList.add('hidden');
+    scheduleNone.classList.remove('hidden');
+    monthsInput.value = 1;
+    updateCost();
+  } else {
+    scheduleSelect.innerHTML = '<option value="">— Any slot (no preference) —</option>';
+    slots.forEach(s => {
+      const opt = document.createElement('option');
+      opt.value       = s.id;
+      opt.textContent = s.label;
+      scheduleSelect.appendChild(opt);
+    });
+    scheduleNote.classList.remove('hidden');
+    scheduleNone.classList.add('hidden');
+    // Default to first slot's months
+    monthsInput.value = slots[0].months;
+    updateCost();
+  }
+}
+
+tutorSelect.addEventListener('change', updateSchedule);
+scheduleSelect.addEventListener('change', onScheduleChange);
+if (tutorSelect.value) updateSchedule();
+</script>
+{% endblock %}
+

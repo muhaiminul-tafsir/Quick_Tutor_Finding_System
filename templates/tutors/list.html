@@ -1,0 +1,53 @@
+{% extends 'base/luminary_base.html' %}
+{% block title %}Tutors | QuickTutor{% endblock %}
+{% block page_title %}Find a Tutor{% endblock %}
+{% block nav_tutors %}bg-white text-indigo-700 shadow-sm{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+  <h2 class="text-2xl font-black text-on-surface">Find a Tutor</h2>
+  <p class="text-sm text-on-muted mt-1">Browse qualified tutors and book your first session.</p>
+</div>
+
+{% if tutors %}
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+  {% for tutor in tutors %}
+  <div class="bg-white rounded-2xl border border-outline/10 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all overflow-hidden group">
+    <!-- Card top gradient -->
+    <div class="h-2 grad"></div>
+    <div class="p-6">
+      <div class="flex items-center gap-4 mb-4">
+        <div class="w-14 h-14 rounded-2xl grad flex items-center justify-center text-white font-black text-2xl flex-shrink-0">
+          {{ tutor.username|upper|first }}
+        </div>
+        <div>
+          <h3 class="font-bold text-base">{{ tutor.get_full_name|default:tutor.username }}</h3>
+          <p class="text-xs text-indigo-600 font-semibold">{{ tutor.tutor_profile.subject|default:"General Tutoring" }}</p>
+          <div class="flex items-center gap-1 mt-1">
+            <span class="text-amber-400 text-sm">★</span>
+            <span class="text-xs font-bold">{{ tutor.tutor_profile.rating|default:"N/A" }}</span>
+            <span class="text-xs text-on-muted">/5</span>
+          </div>
+        </div>
+      </div>
+      {% if tutor.tutor_profile.bio %}
+      <p class="text-sm text-on-muted leading-relaxed mb-4 line-clamp-2">{{ tutor.tutor_profile.bio }}</p>
+      {% endif %}
+      <div class="flex items-center justify-between pt-4 border-t border-surface-low">
+        <div>
+          <p class="text-xs text-on-muted">Monthly Rate</p>
+          <p class="text-base font-black text-indigo-600">৳{{ tutor.tutor_profile.monthly_rate|default:"4000" }}</p>
+        </div>
+        <a href="/tutors/{{ tutor.id }}/" class="px-5 py-2.5 grad text-white font-bold rounded-xl text-sm hover:opacity-90 transition-all">View Profile</a>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="bg-white rounded-2xl border border-outline/10 p-16 text-center">
+  <span class="material-symbols-outlined text-6xl text-slate-200 mb-4 block">school</span>
+  <p class="text-slate-400 font-semibold text-lg">No tutors available yet.</p>
+</div>
+{% endif %}
+{% endblock %}

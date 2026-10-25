@@ -1,0 +1,68 @@
+{% extends 'base/luminary_base.html' %}
+{% block title %}Edit {{ target_user.username }} | Admin Panel{% endblock %}
+{% block page_title %}Edit User{% endblock %}
+{% block nav_admin_users %}bg-white text-indigo-700 shadow-sm{% endblock %}
+{% block topbar_action %}
+<a href="/admin-panel/users/{{ target_user.id }}/" class="px-4 py-2 bg-surface-low hover:bg-surface-high font-bold rounded-xl text-sm transition-all flex items-center gap-1">
+  <span class="material-symbols-outlined text-base">arrow_back</span> User
+</a>
+{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto">
+  <div class="bg-white rounded-2xl border border-outline/10 shadow-sm overflow-hidden">
+    <div class="p-6 border-b border-outline/10 flex items-center gap-4">
+      <div class="w-12 h-12 rounded-xl grad flex items-center justify-center text-white text-xl font-black">{{ target_user.username|first|upper }}</div>
+      <div>
+        <h2 class="font-black text-lg">Edit @{{ target_user.username }}</h2>
+        <p class="text-sm text-on-muted">{{ target_user.role|capfirst }} account</p>
+      </div>
+    </div>
+    <form method="POST" class="p-6 space-y-5">
+      {% csrf_token %}
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-on-muted mb-2">First Name</label>
+          <input type="text" name="first_name" value="{{ target_user.first_name }}"
+            class="w-full px-4 py-3 bg-surface-low border-2 border-outline/30 rounded-xl text-sm font-semibold focus:border-indigo-500 focus:bg-white outline-none transition-all">
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-on-muted mb-2">Last Name</label>
+          <input type="text" name="last_name" value="{{ target_user.last_name }}"
+            class="w-full px-4 py-3 bg-surface-low border-2 border-outline/30 rounded-xl text-sm font-semibold focus:border-indigo-500 focus:bg-white outline-none transition-all">
+        </div>
+      </div>
+      <div>
+        <label class="block text-xs font-bold uppercase tracking-wider text-on-muted mb-2">Email</label>
+        <input type="email" name="email" value="{{ target_user.email }}"
+          class="w-full px-4 py-3 bg-surface-low border-2 border-outline/30 rounded-xl text-sm font-semibold focus:border-indigo-500 focus:bg-white outline-none transition-all">
+      </div>
+      <div>
+        <label class="block text-xs font-bold uppercase tracking-wider text-on-muted mb-2">Phone</label>
+        <input type="text" name="phone" value="{{ target_user.phone|default:'' }}"
+          class="w-full px-4 py-3 bg-surface-low border-2 border-outline/30 rounded-xl text-sm font-semibold focus:border-indigo-500 focus:bg-white outline-none transition-all">
+      </div>
+      <div>
+        <label class="block text-xs font-bold uppercase tracking-wider text-on-muted mb-2">Bio</label>
+        <textarea name="bio" rows="3"
+          class="w-full px-4 py-3 bg-surface-low border-2 border-outline/30 rounded-xl text-sm font-semibold focus:border-indigo-500 focus:bg-white outline-none transition-all resize-none">{{ target_user.bio|default:'' }}</textarea>
+      </div>
+      <div class="flex gap-6">
+        <label class="flex items-center gap-3 cursor-pointer">
+          <input type="checkbox" name="is_active" {% if target_user.is_active %}checked{% endif %}
+            class="w-5 h-5 rounded accent-indigo-600">
+          <span class="text-sm font-bold">Active Account</span>
+        </label>
+        <label class="flex items-center gap-3 cursor-pointer">
+          <input type="checkbox" name="is_staff" {% if target_user.is_staff %}checked{% endif %}
+            class="w-5 h-5 rounded accent-indigo-600">
+          <span class="text-sm font-bold">Staff / Admin Access</span>
+        </label>
+      </div>
+      <div class="flex gap-3 pt-2">
+        <button type="submit" class="flex-1 py-3 grad text-white font-black rounded-xl hover:opacity-90 transition-all">Save Changes</button>
+        <a href="/admin-panel/users/{{ target_user.id }}/" class="px-6 py-3 bg-surface-low text-on-surface font-bold rounded-xl hover:bg-surface-high transition-all text-sm">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

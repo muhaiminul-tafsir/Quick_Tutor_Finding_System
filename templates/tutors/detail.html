@@ -1,0 +1,133 @@
+{% extends 'base/luminary_base.html' %}
+{% block title %}{{ tutor.get_full_name|default:tutor.username }} | QuickTutor{% endblock %}
+{% block page_title %}Tutor Profile{% endblock %}
+{% block nav_tutors %}bg-white text-indigo-700 shadow-sm{% endblock %}
+{% block topbar_action %}
+<a href="/tutors/" class="px-4 py-2 bg-surface-low hover:bg-surface-high font-bold rounded-xl text-sm transition-all flex items-center gap-1">
+  <span class="material-symbols-outlined text-base">arrow_back</span> All Tutors
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto space-y-6">
+
+  <!-- Profile hero -->
+  <div class="bg-white rounded-3xl border border-outline/10 shadow-sm overflow-hidden">
+    <div class="h-28 grad relative">
+      <div class="absolute inset-0 opacity-20"><div class="absolute right-10 top-4 w-40 h-40 bg-white rounded-full blur-3xl"></div></div>
+    </div>
+    <div class="px-8 pb-8">
+      <div class="flex items-end justify-between -mt-10 mb-6 flex-wrap gap-4">
+        <div class="w-20 h-20 rounded-2xl grad flex items-center justify-center text-white font-black text-3xl border-4 border-white shadow-lg">
+          {% if tutor.first_name %}{{ tutor.first_name|upper|first }}{% else %}{{ tutor.username|upper|first }}{% endif %}
+        </div>
+        {% if user.role == 'student' %}
+        <a href="/bookings/create/?tutor_id={{ tutor.id }}" class="px-6 py-3 grad text-white font-bold rounded-xl text-sm hover:opacity-90 transition-all shadow-md flex items-center gap-2">
+          <span class="material-symbols-outlined text-base">book_online</span> Book Session
+        </a>
+        {% endif %}
+      </div>
+      <h2 class="text-2xl font-black">{{ tutor.get_full_name|default:tutor.username }}</h2>
+      {% if tutor.tutor_profile %}
+      <p class="text-indigo-600 font-semibold mt-1">{{ tutor.tutor_profile.subject }}</p>
+      <div class="flex items-center gap-1 mt-1">
+        <span class="text-amber-400">★</span>
+        <span class="font-bold text-sm">{{ tutor.tutor_profile.rating }}/5</span>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="md:col-span-2 space-y-5">
+      {% if tutor.tutor_profile.bio %}
+      <div class="bg-white rounded-2xl border border-outline/10 shadow-sm p-6">
+        <h3 class="font-bold text-base mb-3 flex items-center gap-2">
+          <span class="material-symbols-outlined text-indigo-500">person</span> About
+        </h3>
+        <p class="text-sm text-on-surface leading-relaxed">{{ tutor.tutor_profile.bio }}</p>
+      </div>
+      {% endif %}
+
+      <!-- Schedule -->
+      {% with slots=tutor.schedules.all %}
+      {% if slots %}
+      <div class="bg-white rounded-2xl border border-outline/10 shadow-sm p-6">
+        <h3 class="font-bold text-base mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined text-indigo-500">schedule</span> Available Schedule
+        </h3>
+        <div class="space-y-2">
+          {% for slot in slots %}
+          <div class="flex items-center gap-3 px-4 py-2.5 bg-surface-low rounded-xl text-sm">
+            <span class="material-symbols-outlined text-indigo-400 text-base">event</span>
+            <span class="font-semibold">{{ slot.display }}</span>
+            {% if slot.is_booked %}
+            <span class="ml-auto text-xs font-bold text-red-400">Booked</span>
+            {% else %}
+            <span class="ml-auto text-xs font-bold text-green-600">Available</span>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+      {% endwith %}
+      
+      {% if reviews %}
+      <div class="bg-white rounded-2xl border border-outline/10 shadow-sm p-6">
+        <h3 class="font-bold text-base mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined text-amber-500">star</span> Reviews
+        </h3>
+        <div class="space-y-4">
+          {% for review in reviews %}
+          <div class="p-4 bg-surface-low rounded-xl">
+            <div class="flex items-center gap-2 mb-2">
+              <div class="w-8 h-8 rounded-lg grad flex items-center justify-center text-white font-bold text-xs">{{ review.student.username|upper|first }}</div>
+              <div>
+                <p class="text-sm font-bold">{{ review.student.get_full_name|default:review.student.username }}</p>
+                <div class="flex gap-0.5">
+                  {% for i in "xxxxx"|make_list %}
+                    {% if forloop.counter <= review.rating %}
+                      <span class="text-amber-400 text-xs">★</span>
+                    {% else %}
+                      <span class="text-slate-200 text-xs">★</span>
+                    {% endif %}
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+            <p class="text-sm text-on-surface">{{ review.comment }}</p>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <div>
+      <div class="bg-white rounded-2xl border border-outline/10 shadow-sm p-6 space-y-4">
+        <h3 class="font-bold text-sm text-on-muted uppercase tracking-wider">Details</h3>
+        {% if tutor.tutor_profile %}
+        <div class="space-y-3 text-sm">
+          <div class="flex justify-between items-center py-2 border-b border-surface-low">
+            <span class="text-on-muted">Subject</span>
+            <span class="font-bold">{{ tutor.tutor_profile.subject }}</span>
+          </div>
+          <div class="flex justify-between items-center py-2 border-b border-surface-low">
+            <span class="text-on-muted">Rating</span>
+            <span class="font-bold">★ {{ tutor.tutor_profile.rating }}/5</span>
+          </div>
+          <div class="flex justify-between items-center py-2">
+            <span class="text-on-muted">Monthly Rate</span>
+            <span class="font-black text-indigo-600 text-base">৳{{ tutor.tutor_profile.monthly_rate }}</span>
+          </div>
+        </div>
+        {% endif %}
+        {% if user.role == 'student' %}
+        <a href="/bookings/create/?tutor_id={{ tutor.id }}" class="w-full py-3 grad text-white font-bold rounded-xl text-sm text-center block hover:opacity-90 transition-all">Book Now</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

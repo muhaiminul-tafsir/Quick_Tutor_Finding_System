@@ -1,0 +1,170 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block content %}
+{% load i18n %}
+
+<style>
+@keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+.fade-in { animation: fadeUp .4s ease forwards; }
+.stat-card { background:white; border:1px solid #e5e7eb; border-radius:16px; padding:24px; transition:transform .2s, box-shadow .2s; position:relative; overflow:hidden; }
+.stat-card:hover { transform:translateY(-4px); box-shadow:0 20px 40px rgba(53,37,205,.12); }
+.stat-card::before { content:''; position:absolute; top:0; left:0; right:0; height:4px; }
+.stat-card.blue::before   { background:linear-gradient(90deg,#3525cd,#4f46e5); }
+.stat-card.green::before  { background:linear-gradient(90deg,#22c55e,#16a34a); }
+.stat-card.yellow::before { background:linear-gradient(90deg,#f59e0b,#d97706); }
+.stat-card.red::before    { background:linear-gradient(90deg,#ef4444,#dc2626); }
+.stat-card.purple::before { background:linear-gradient(90deg,#8b5cf6,#7c3aed); }
+
+.quick-link { background:white; border:1px solid #e5e7eb; border-radius:14px; padding:20px; text-decoration:none; color:#141b2b; transition:all .2s; display:block; }
+.quick-link:hover { border-color:#3525cd; background:#f1f3ff; transform:translateY(-2px); box-shadow:0 8px 24px rgba(53,37,205,.1); color:#3525cd; }
+.quick-link .icon { font-size:32px; margin-bottom:12px; }
+.quick-link h4 { font-size:14px; font-weight:700; margin:0 0 4px; }
+.quick-link p { font-size:12px; color:#6b7280; margin:0; }
+
+.app-section { background:white; border:1px solid #e5e7eb; border-radius:16px; overflow:hidden; margin-bottom:20px; }
+.app-section-header { padding:16px 20px; background:linear-gradient(135deg,#3525cd,#4f46e5); display:flex; align-items:center; justify-content:space-between; }
+.app-section-header h3 { color:white; font-size:14px; font-weight:800; margin:0; letter-spacing:.3px; }
+.app-section-header a { color:rgba(255,255,255,.8); font-size:12px; font-weight:600; text-decoration:none; background:rgba(255,255,255,.15); padding:5px 12px; border-radius:20px; border:1px solid rgba(255,255,255,.25); transition:all .15s; }
+.app-section-header a:hover { background:rgba(255,255,255,.25); color:white; }
+.model-row { display:flex; align-items:center; justify-content:space-between; padding:14px 20px; border-bottom:1px solid #f3f4f6; transition:background .15s; }
+.model-row:last-child { border-bottom:none; }
+.model-row:hover { background:#f9f9ff; }
+.model-row-name { font-size:14px; font-weight:600; color:#141b2b; }
+.model-row-actions { display:flex; gap:8px; }
+.model-row-actions a { font-size:12px; font-weight:700; text-decoration:none; padding:5px 12px; border-radius:8px; transition:all .15s; }
+.model-row-actions a.view { color:#3525cd; background:#e9edff; }
+.model-row-actions a.view:hover { background:#3525cd; color:white; }
+.model-row-actions a.add { color:#166534; background:#f0fdf4; }
+.model-row-actions a.add:hover { background:#22c55e; color:white; }
+</style>
+
+<!-- Page header -->
+<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:28px;" class="fade-in">
+    <div>
+        <h1 style="font-size:28px; font-weight:900; color:#141b2b; margin:0 0 4px;">
+            👋 Welcome, {{ user.first_name|default:user.username }}!
+        </h1>
+        <p style="color:#6b7280; font-size:14px; margin:0;">QuickTutor Admin Dashboard — manage your platform from here.</p>
+    </div>
+    <a href="/payments/manage/" style="background:linear-gradient(135deg,#3525cd,#4f46e5); color:white; padding:12px 24px; border-radius:12px; font-weight:700; font-size:14px; text-decoration:none; display:flex; align-items:center; gap:8px; box-shadow:0 4px 16px rgba(53,37,205,.3); transition:all .2s;">
+        💳 Review Payments
+    </a>
+</div>
+
+<!-- Stats Row -->
+<div style="display:grid; grid-template-columns:repeat(5,1fr); gap:16px; margin-bottom:28px;">
+    <div class="stat-card blue fade-in" style="animation-delay:.05s">
+        <div style="font-size:32px; font-weight:900; color:#3525cd; margin-bottom:6px;">
+            {{ app_list|length }}
+        </div>
+        <div style="font-size:12px; font-weight:700; color:#6b7280; text-transform:uppercase; letter-spacing:.5px;">App Modules</div>
+        <div style="position:absolute; right:20px; top:50%; transform:translateY(-50%); font-size:40px; opacity:.08;">📦</div>
+    </div>
+    <div class="stat-card green fade-in" style="animation-delay:.1s">
+        <div style="font-size:32px; font-weight:900; color:#22c55e; margin-bottom:6px;">✓</div>
+        <div style="font-size:12px; font-weight:700; color:#6b7280; text-transform:uppercase; letter-spacing:.5px;">System OK</div>
+        <div style="position:absolute; right:20px; top:50%; transform:translateY(-50%); font-size:40px; opacity:.08;">⚡</div>
+    </div>
+    <div class="stat-card yellow fade-in" style="animation-delay:.15s">
+        <a href="/payments/manage/?status=pending" style="text-decoration:none;">
+            <div style="font-size:32px; font-weight:900; color:#f59e0b; margin-bottom:6px;">Review</div>
+            <div style="font-size:12px; font-weight:700; color:#6b7280; text-transform:uppercase; letter-spacing:.5px;">Payments Pending</div>
+        </a>
+        <div style="position:absolute; right:20px; top:50%; transform:translateY(-50%); font-size:40px; opacity:.08;">💳</div>
+    </div>
+    <div class="stat-card red fade-in" style="animation-delay:.2s">
+        <a href="/admin/accounts/user/" style="text-decoration:none;">
+            <div style="font-size:32px; font-weight:900; color:#ef4444; margin-bottom:6px;">Users</div>
+            <div style="font-size:12px; font-weight:700; color:#6b7280; text-transform:uppercase; letter-spacing:.5px;">Manage All</div>
+        </a>
+        <div style="position:absolute; right:20px; top:50%; transform:translateY(-50%); font-size:40px; opacity:.08;">👥</div>
+    </div>
+    <div class="stat-card purple fade-in" style="animation-delay:.25s">
+        <a href="/admin/bookings/booking/" style="text-decoration:none;">
+            <div style="font-size:32px; font-weight:900; color:#8b5cf6; margin-bottom:6px;">Books</div>
+            <div style="font-size:12px; font-weight:700; color:#6b7280; text-transform:uppercase; letter-spacing:.5px;">Bookings</div>
+        </a>
+        <div style="position:absolute; right:20px; top:50%; transform:translateY(-50%); font-size:40px; opacity:.08;">📋</div>
+    </div>
+</div>
+
+<!-- Quick Links -->
+<h2 style="font-size:16px; font-weight:800; color:#141b2b; margin:0 0 14px; letter-spacing:-.3px;" class="fade-in">⚡ Quick Actions</h2>
+<div style="display:grid; grid-template-columns:repeat(6,1fr); gap:14px; margin-bottom:32px;">
+    <a href="/payments/manage/" class="quick-link fade-in" style="animation-delay:.05s">
+        <div class="icon">💳</div>
+        <h4>Payments</h4>
+        <p>Approve / Reject</p>
+    </a>
+    <a href="/admin/accounts/user/" class="quick-link fade-in" style="animation-delay:.1s">
+        <div class="icon">👥</div>
+        <h4>Users</h4>
+        <p>All user accounts</p>
+    </a>
+    <a href="/admin/bookings/booking/" class="quick-link fade-in" style="animation-delay:.15s">
+        <div class="icon">📋</div>
+        <h4>Bookings</h4>
+        <p>All sessions</p>
+    </a>
+    <a href="/admin/tutors/tutorprofile/" class="quick-link fade-in" style="animation-delay:.2s">
+        <div class="icon">👨‍🏫</div>
+        <h4>Tutors</h4>
+        <p>Tutor profiles</p>
+    </a>
+    <a href="/admin/reviews/review/" class="quick-link fade-in" style="animation-delay:.25s">
+        <div class="icon">⭐</div>
+        <h4>Reviews</h4>
+        <p>Student feedback</p>
+    </a>
+    <a href="/" class="quick-link fade-in" style="animation-delay:.3s">
+        <div class="icon">🌐</div>
+        <h4>View Site</h4>
+        <p>Open frontend</p>
+    </a>
+</div>
+
+<!-- App Modules -->
+<h2 style="font-size:16px; font-weight:800; color:#141b2b; margin:0 0 14px; letter-spacing:-.3px;" class="fade-in">📦 Data Models</h2>
+
+{% if app_list %}
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+    {% for app in app_list %}
+        <div class="app-section fade-in">
+            <div class="app-section-header">
+                <h3>
+                    {% if app.name == 'Accounts' %}👤
+                    {% elif app.name == 'Bookings' %}📋
+                    {% elif app.name == 'Payments' %}💳
+                    {% elif app.name == 'Tutors' %}👨‍🏫
+                    {% elif app.name == 'Reviews' %}⭐
+                    {% elif app.name == 'Authentication and Authorization' %}🔐
+                    {% else %}📦{% endif %}
+                    {{ app.name }}
+                </h3>
+                <a href="{{ app.app_url }}">View all</a>
+            </div>
+            {% for model in app.models %}
+            <div class="model-row">
+                <div class="model-row-name">{{ model.name }}</div>
+                <div class="model-row-actions">
+                    {% if model.admin_url %}
+                        <a href="{{ model.admin_url }}" class="view">📋 List</a>
+                    {% endif %}
+                    {% if model.add_url %}
+                        <a href="{{ model.add_url }}" class="add">+ Add</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% endfor %}
+    </div>
+{% else %}
+    <div style="background:white; border:1px solid #e5e7eb; border-radius:16px; padding:48px; text-align:center;">
+        <div style="font-size:48px; margin-bottom:12px;">📭</div>
+        <p style="color:#6b7280; font-weight:600;">{% trans "You don't have permission to edit anything." %}</p>
+    </div>
+{% endif %}
+
+{% endblock %}

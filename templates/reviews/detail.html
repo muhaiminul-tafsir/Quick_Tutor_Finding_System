@@ -1,0 +1,263 @@
+{% load static %}
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Review Details - QuickTutor</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container": "#e9edff",
+                        "on-error-container": "#93000a",
+                        "on-secondary-fixed-variant": "#004e5c",
+                        "tertiary-container": "#a44100",
+                        "tertiary": "#7e3000",
+                        "on-error": "#ffffff",
+                        "surface-container-high": "#e1e8fd",
+                        "on-surface": "#141b2b",
+                        "outline": "#777587",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-container": "#4f46e5",
+                        "secondary-container": "#57dffe",
+                        "on-tertiary-fixed-variant": "#7b2f00",
+                        "on-primary-fixed": "#0f0069",
+                        "primary-fixed": "#e2dfff",
+                        "error-container": "#ffdad6",
+                        "surface-tint": "#4d44e3",
+                        "on-primary-container": "#dad7ff",
+                        "on-tertiary-fixed": "#351000",
+                        "surface-variant": "#dce2f7",
+                        "tertiary-fixed-dim": "#ffb695",
+                        "on-tertiary": "#ffffff",
+                        "inverse-on-surface": "#edf0ff",
+                        "primary": "#3525cd",
+                        "on-secondary-fixed": "#001f26",
+                        "tertiary-fixed": "#ffdbcc",
+                        "on-secondary": "#ffffff",
+                        "inverse-surface": "#293040",
+                        "surface-dim": "#d3daef",
+                        "on-tertiary-container": "#ffd2be",
+                        "background": "#f9f9ff",
+                        "on-surface-variant": "#464555",
+                        "on-primary": "#ffffff",
+                        "primary-fixed-dim": "#c3c0ff",
+                        "surface-bright": "#f9f9ff",
+                        "inverse-primary": "#c3c0ff",
+                        "secondary-fixed-dim": "#4cd7f6",
+                        "outline-variant": "#c7c4d8",
+                        "on-primary-fixed-variant": "#3323cc",
+                        "surface-container-highest": "#dce2f7",
+                        "secondary-fixed": "#acedff",
+                        "secondary": "#00687a",
+                        "surface-container-low": "#f1f3ff",
+                        "on-background": "#141b2b",
+                        "on-secondary-container": "#006172",
+                        "surface": "#f9f9ff",
+                        "error": "#ba1a1a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .indigo-gradient {
+            background: linear-gradient(135deg, #3525cd 0%, #4f46e5 100%);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body antialiased">
+<!-- TopNavBar -->
+<header class="w-full sticky top-0 z-50 bg-[#f1f3ff] dark:bg-slate-900 shadow-none">
+    <div class="flex justify-between items-center px-8 py-4 max-w-screen-2xl mx-auto">
+        <div class="flex items-center gap-8">
+            <a href="/" class="text-xl font-black text-indigo-700 dark:text-indigo-400 tracking-tight">QuickTutor</a>
+            <nav class="hidden md:flex items-center space-x-6">
+                <a href="/dashboard/" class="text-slate-600 dark:text-slate-400 font-medium hover:bg-indigo-50 dark:hover:bg-slate-800 transition-colors duration-200 px-3 py-1 rounded-lg">Dashboard</a>
+                <a href="/tutors/" class="text-slate-600 dark:text-slate-400 font-medium hover:bg-indigo-50 dark:hover:bg-slate-800 transition-colors duration-200 px-3 py-1 rounded-lg">Find a Tutor</a>
+                <a href="/bookings/" class="text-slate-600 dark:text-slate-400 font-medium hover:bg-indigo-50 dark:hover:bg-slate-800 transition-colors duration-200 px-3 py-1 rounded-lg">My Bookings</a>
+            </nav>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="hidden md:flex items-center gap-2">
+                {% if user.is_authenticated %}
+                    <span class="text-sm text-on-surface-variant">{{ user.username }}</span>
+                    <a href="/accounts/logout/" class="text-slate-600 hover:text-primary transition-colors font-medium">Logout</a>
+                {% else %}
+                    <a href="/accounts/login/" class="text-slate-600 hover:text-primary transition-colors font-medium">Login</a>
+                {% endif %}
+            </div>
+            {% if user.is_authenticated %}
+                <img alt="User avatar" class="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm" src="https://via.placeholder.com/40"/>
+            {% endif %}
+        </div>
+    </div>
+</header>
+
+<main class="max-w-screen-2xl mx-auto px-8 py-12">
+    <!-- Header -->
+    <div class="mb-12">
+        <a href="/reviews/" class="flex items-center gap-2 text-primary font-medium hover:gap-3 transition-all mb-6">
+            <span class="material-symbols-outlined text-xl">arrow_back</span>
+            Back to Reviews
+        </a>
+        <h1 class="text-4xl font-black text-on-background tracking-tight mb-2">Review Details</h1>
+        <p class="text-on-surface-variant text-lg">Detailed information about this student review</p>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Left Column: Review Content -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Review Card -->
+            <div class="bg-surface-container-lowest p-8 rounded-2xl shadow-sm border border-outline-variant/10">
+                <div class="mb-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-2xl font-bold text-on-background">Review</h2>
+                        <span class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">
+                            {{ review.created_at|date:'M d, Y' }}
+                        </span>
+                    </div>
+
+                    <!-- Star Rating -->
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="flex text-amber-400 gap-1">
+                            {% for i in "x"|rjust:review.rating %}
+                                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+                            {% endfor %}
+                        </div>
+                        <span class="text-lg font-bold text-on-surface">{{ review.rating }}/5</span>
+                    </div>
+                </div>
+
+                <!-- Review Comment -->
+                <div class="bg-surface-container-low p-6 rounded-xl mb-6">
+                    <p class="text-on-surface leading-relaxed text-lg italic">"{{ review.comment }}"</p>
+                </div>
+            </div>
+
+            <!-- Student Information Card -->
+            <div class="bg-surface-container-lowest p-8 rounded-2xl shadow-sm border border-outline-variant/10">
+                <h3 class="text-xl font-bold text-on-background mb-6">Student Information</h3>
+                <div class="flex items-center gap-4">
+                    <div class="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center text-2xl font-bold text-primary">
+                        {{ review.booking.student.username|upper|first }}
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-1">Student</p>
+                        <p class="text-lg font-bold text-on-surface">{{ review.booking.student.get_full_name|default:review.booking.student.username }}</p>
+                        <p class="text-sm text-on-surface-variant">@{{ review.booking.student.username }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tutor Information Card -->
+            <div class="bg-surface-container-lowest p-8 rounded-2xl shadow-sm border border-outline-variant/10">
+                <h3 class="text-xl font-bold text-on-background mb-6">Tutor Information</h3>
+                <div class="flex items-center gap-4">
+                    <div class="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center text-2xl font-bold text-primary">
+                        {{ review.booking.tutor.username|upper|first }}
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-1">Tutor</p>
+                        <p class="text-lg font-bold text-on-surface">{{ review.booking.tutor.get_full_name|default:review.booking.tutor.username }}</p>
+                        {% if review.booking.tutor.tutor_profile %}
+                            <p class="text-sm text-primary font-medium">{{ review.booking.tutor.tutor_profile.subject }}</p>
+                        {% else %}
+                            <p class="text-sm text-on-surface-variant">Tutor Profile</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Session Details -->
+        <div class="lg:col-span-1">
+            <!-- Session Card -->
+            <div class="bg-surface-container-lowest p-8 rounded-2xl shadow-sm border border-outline-variant/10 sticky top-24">
+                <h3 class="text-xl font-bold text-on-background mb-6">Session Details</h3>
+
+                <div class="space-y-6">
+                    <div class="flex items-start gap-4">
+                        <span class="material-symbols-outlined text-primary mt-1">calendar_today</span>
+                        <div>
+                            <p class="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-1">Date</p>
+                            <p class="text-on-surface font-medium">{{ review.booking.date|date:'M d, Y' }}</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-4">
+                        <span class="material-symbols-outlined text-primary mt-1">schedule</span>
+                        <div>
+                            <p class="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-1">Time</p>
+                            <p class="text-on-surface font-medium">{{ review.booking.time|default:"Not specified" }}</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-4">
+                        <span class="material-symbols-outlined text-primary mt-1">hourglass_empty</span>
+                        <div>
+                            <p class="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-1">Duration</p>
+                            <p class="text-on-surface font-medium">60 Minutes</p>
+                        </div>
+                    </div>
+
+                    <div class="pt-4 border-t border-outline-variant/15">
+                        <p class="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-2">Booking ID</p>
+                        <p class="font-mono text-sm text-on-surface">#{{ review.booking.id }}</p>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="mt-8 space-y-3">
+                    <a href="/bookings/{{ review.booking.id }}/" class="w-full block text-center indigo-gradient text-on-primary py-3 rounded-xl font-bold transition-transform active:scale-95">
+                        View Full Booking
+                    </a>
+                    <a href="/reviews/" class="w-full block text-center bg-surface-container hover:bg-surface-container-high text-on-surface py-3 rounded-xl font-bold transition-colors">
+                        Back to Reviews
+                    </a>
+                </div>
+            </div>
+
+            <!-- Trust Badge -->
+            <div class="mt-6 bg-surface-container-low p-6 rounded-xl flex items-start gap-3">
+                <span class="material-symbols-outlined text-secondary flex-shrink-0 mt-1">verified_user</span>
+                <div>
+                    <p class="font-bold text-on-surface text-sm mb-1">Verified Review</p>
+                    <p class="text-xs text-on-surface-variant">This review is from a completed booking session.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Footer -->
+<footer class="bg-surface-container-low py-12 mt-24">
+    <div class="max-w-screen-2xl mx-auto px-8 text-center text-xs text-on-surface-variant">
+        © 2024 QuickTutor. All rights reserved.
+    </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,316 @@
+{% extends 'base/luminary_base.html' %}
+{% block title %}Booking #{{ booking.id }} | QuickTutor{% endblock %}
+{% block page_title %}Booking #{{ booking.id }}{% endblock %}
+{% block nav_bookings %}bg-white text-indigo-700 shadow-sm{% endblock %}
+{% block nav_students %}bg-white text-indigo-700 shadow-sm{% endblock %}
+{% block mob_bookings %}text-indigo-600{% endblock %}
+{% block mob_students %}text-indigo-600{% endblock %}
+{% block topbar_action %}
+<a href="/bookings/" class="px-4 py-2 bg-surface-low hover:bg-surface-high font-bold rounded-xl text-sm transition-all flex items-center gap-1">
+  <span class="material-symbols-outlined text-base">arrow_back</span> Back
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+  <!-- Left: Main info -->
+  <div class="md:col-span-2 space-y-5">
+
+    <!-- Status Banner -->
+    <div class="bg-white rounded-2xl border border-outline/10 shadow-sm p-6 flex items-center justify-between flex-wrap gap-4">
+      <div>
+        <p class="text-xs font-bold text-on-muted uppercase tracking-wider mb-1">Booking Status</p>
+        <span class="px-4 py-1.5 rounded-full text-sm font-black
+          {% if booking.status == 'confirmed' %}bg-green-100 text-green-700
+          {% elif booking.status == 'pending' %}bg-yellow-100 text-yellow-700
+          {% elif booking.status == 'completed' %}bg-blue-100 text-blue-700
+          {% elif booking.status == 'rejected' %}bg-red-100 text-red-700
+          {% elif booking.status == 'cancelled' %}bg-gray-100 text-gray-500
+          {% else %}bg-gray-100 text-gray-600{% endif %}">
+          {{ booking.get_status_display }}
+        </span>
+      </div>
+      <div>
+        <p class="text-xs font-bold text-on-muted uppercase tracking-wider mb-1">Payment</p>
+        {% if booking.is_fully_paid %}
+        <span class="px-4 py-1.5 rounded-full text-sm font-black bg-green-100 text-green-700">✓ Fully Paid</span>
+        {% elif booking.total_paid > 0 %}
+        <span class="px-4 py-1.5 rounded-full text-sm font-black bg-amber-100 text-amber-700">
+          ৳{{ booking.total_paid }} paid
+        </span>
+        {% else %}
+        {% if user == booking.student %}
+        <a href="/payments/create/?booking_id={{ booking.id }}" class="px-4 py-1.5 grad text-white rounded-full text-sm font-black hover:opacity-90">Pay Now</a>
+        {% else %}
+        <span class="px-4 py-1.5 rounded-full text-sm font-black bg-yellow-100 text-yellow-700">Unpaid</span>
+        {% endif %}
+        {% endif %}
+      </div>
+      {% if user == booking.student and not booking.payments.exists and booking.status not in 'completed,cancelled,rejected' %}
+      <div>
+        <a href="/bookings/{{ booking.id }}/cancel/"
+           onclick="return confirm('Are you sure you want to cancel this booking?')"
+           class="px-4 py-1.5 bg-red-50 border border-red-200 text-red-600 hover:bg-red-100 rounded-full text-sm font-black transition-all">
+          ✕ Cancel Booking
+        </a>
+      </div>
+      {% endif %}
+      <div>
+        <p class="text-xs font-bold text-on-muted uppercase tracking-wider mb-1">Created</p>
+        <p class="text-sm font-semibold">{{ booking.created_at|date:'M d, Y' }}</p>
+      </div>
+    </div>
+
+    <!-- Booking Details -->
+    <div class="bg-white rounded-2xl border border-outline/10 shadow-sm p-6">
+      <h3 class="font-bold text-base mb-5 flex items-center gap-2">
+        <span class="material-symbols-outlined text-indigo-500">info</span> Booking Details
+      </h3>
+      <div class="grid grid-cols-2 gap-4">
+        <div class="bg-surface-low rounded-xl p-4">
+          <p class="text-xs font-bold text-on-muted uppercase tracking-wider mb-1">Start Date</p>
+          <p class="font-bold text-sm">{{ booking.date|date:'l, M d, Y' }}</p>
+        </div>
+        <div class="bg-surface-low rounded-xl p-4">
+          <p class="text-xs font-bold text-on-muted uppercase tracking-wider mb-1">Duration</p>
+          <p class="font-bold text-sm">{{ booking.months }} month{% if booking.months > 1 %}s{% endif %}</p>
+        </div>
+        {% if booking.schedule %}
+        <div class="bg-surface-low rounded-xl p-4 col-span-2">
+          <p class="text-xs font-bold text-on-muted uppercase tracking-wider mb-1">Schedule</p>
+          <p class="font-bold text-sm">{{ booking.schedule.display }}</p>
+        </div>
+        {% endif %}
+        {% if booking.total_paid > 0 %}
+        <div class="bg-surface-low rounded-xl p-4">
+          <p class="text-xs font-bold text-on-muted uppercase tracking-wider mb-1">Total Paid</p>
+          <p class="font-black text-green-600 text-sm">৳{{ booking.total_paid }}</p>
+        </div>
+        <div class="bg-surface-low rounded-xl p-4">
+          <p class="text-xs font-bold text-on-muted uppercase tracking-wider mb-1">Balance Due</p>
+          <p class="font-black {% if booking.balance_due > 0 %}text-red-500{% else %}text-green-600{% endif %} text-sm">
+            ৳{{ booking.balance_due }}
+          </p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- STUDENT: Tutor message + meet link -->
+    {% if user.role == 'student' and booking.payment and booking.payment.status == 'approved' %}
+      {% if booking.tutor_message or booking.meet_link %}
+      <div class="bg-white rounded-2xl border border-outline/10 shadow-sm p-6">
+        <h3 class="font-bold text-base mb-5 flex items-center gap-2">
+          <span class="material-symbols-outlined text-indigo-500">forum</span> Message from Tutor
+        </h3>
+        {% if booking.tutor_message %}
+        <div class="bg-surface-low rounded-xl p-4 mb-4 leading-relaxed text-sm text-on-surface whitespace-pre-line">{{ booking.tutor_message }}</div>
+        {% endif %}
+        {% if booking.meet_link %}
+        <div class="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-4">
+          <span class="material-symbols-outlined text-green-600 text-3xl" style="font-variation-settings:'FILL' 1;">videocam</span>
+          <div>
+            <p class="font-bold text-green-800 text-sm mb-1">Join Your Session</p>
+            <a href="{{ booking.meet_link }}" target="_blank" class="px-5 py-2 grad text-white font-bold rounded-xl text-sm hover:opacity-90 transition-all inline-block">🔗 Join Meet</a>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+      {% else %}
+      <div class="bg-yellow-50 border border-yellow-200 rounded-2xl p-5">
+        <p class="text-yellow-700 font-semibold text-sm">⏳ Waiting for your tutor to add meeting details.</p>
+      </div>
+      {% endif %}
+    {% endif %}
+
+    <!-- TUTOR: Update meet link + message -->
+    {% if user.role == 'tutor' and booking.payment and booking.payment.status == 'approved' %}
+    <div class="bg-white rounded-2xl border border-outline/10 shadow-sm p-6">
+      <h3 class="font-bold text-base mb-5 flex items-center gap-2">
+        <span class="material-symbols-outlined text-green-500">videocam</span> Set Meet Link & Message
+      </h3>
+      <form method="POST" action="/bookings/{{ booking.id }}/tutor-update/" class="space-y-4">
+        {% csrf_token %}
+        <div>
+          <label class="block text-xs font-bold text-on-muted uppercase tracking-wider mb-2">Google Meet / Zoom Link</label>
+          <input type="url" name="meet_link" value="{{ booking.meet_link }}"
+            class="w-full px-4 py-3 bg-surface-low border-2 border-outline/30 rounded-xl text-sm font-medium focus:border-indigo-500 focus:bg-white transition-all outline-none"
+            placeholder="https://meet.google.com/xxx-xxxx-xxx">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-on-muted uppercase tracking-wider mb-2">Message to Student</label>
+          <textarea name="tutor_message" rows="4"
+            class="w-full px-4 py-3 bg-surface-low border-2 border-outline/30 rounded-xl text-sm font-medium focus:border-indigo-500 focus:bg-white transition-all outline-none resize-none"
+            placeholder="Schedule, preparation tips, etc.">{{ booking.tutor_message }}</textarea>
+        </div>
+        <button type="submit" class="w-full py-3 grad text-white font-bold rounded-xl text-sm hover:opacity-90 transition-all">
+          📨 Save & Send to Student
+        </button>
+      </form>
+    </div>
+    {% endif %}
+
+    {% if user.role == 'tutor' and booking.status == 'pending' %}
+    <div class="bg-white rounded-2xl border border-outline/10 shadow-sm p-6">
+      <h3 class="font-bold text-base mb-4">Respond to Booking Request</h3>
+      <div class="flex gap-3">
+        <a href="/bookings/{{ booking.id }}/confirm/" class="flex-1 py-3 bg-green-500 hover:bg-green-600 text-white font-bold rounded-xl text-sm text-center transition-all">✓ Confirm</a>
+        <a href="/bookings/{{ booking.id }}/reject/" class="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl text-sm text-center transition-all">✕ Reject</a>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Tutor: Mark booking as Completed -->
+    {% if user.role == 'tutor' and booking.status == 'confirmed' %}
+    <div class="bg-white rounded-2xl border border-outline/10 shadow-sm p-6">
+      <h3 class="font-bold text-base mb-2 flex items-center gap-2">
+        <span class="material-symbols-outlined text-blue-500">task_alt</span> Complete Booking
+      </h3>
+      <p class="text-xs text-on-muted mb-4">Mark this booking as completed once all sessions are done. This allows the student to leave a review.</p>
+      <a href="/bookings/{{ booking.id }}/complete/"
+         onclick="return confirm('Mark this booking as completed? The student will be able to leave a review.')"
+         class="flex items-center justify-center gap-2 w-full py-3 bg-blue-50 border border-blue-200 text-blue-700 hover:bg-blue-100 font-bold rounded-xl text-sm transition-all">
+        <span class="material-symbols-outlined text-base">check_circle</span> Mark as Completed
+      </a>
+    </div>
+    {% endif %}
+
+    <!-- Student: Mark booking as Completed (when confirmed + payment approved) -->
+    {% if user == booking.student and booking.status == 'confirmed' and booking.payment and booking.payment.status == 'approved' %}
+    <div class="bg-white rounded-2xl border border-outline/10 shadow-sm p-6">
+      <h3 class="font-bold text-base mb-2 flex items-center gap-2">
+        <span class="material-symbols-outlined text-blue-500">task_alt</span> Sessions Done?
+      </h3>
+      <p class="text-xs text-on-muted mb-4">If all your sessions with this tutor are complete, mark the booking as done to leave a review.</p>
+      <a href="/bookings/{{ booking.id }}/complete/"
+         onclick="return confirm('Mark this booking as completed? You will be able to leave a review.')"
+         class="flex items-center justify-center gap-2 w-full py-3 bg-blue-50 border border-blue-200 text-blue-700 hover:bg-blue-100 font-bold rounded-xl text-sm transition-all">
+        <span class="material-symbols-outlined text-base">check_circle</span> Mark as Completed &amp; Review
+      </a>
+    </div>
+    {% endif %}
+
+    <!-- Review -->
+    {% if booking.review %}
+    <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5">
+      <h3 class="font-bold text-sm mb-2 flex items-center gap-2"><span class="text-amber-500">★</span> Review</h3>
+      <div class="flex gap-0.5 mb-2">{% for i in "xxxxx"|make_list %}{% if forloop.counter <= booking.review.rating %}<span class="text-amber-400">★</span>{% else %}<span class="text-slate-200">★</span>{% endif %}{% endfor %}</div>
+      <p class="text-sm text-on-surface">{{ booking.review.comment }}</p>
+    </div>
+    {% elif user == booking.student and booking.status == 'completed' %}
+    <a href="/reviews/create/?booking={{ booking.id }}" class="flex items-center justify-center gap-2 w-full py-3 bg-amber-50 border border-amber-200 text-amber-700 font-bold rounded-2xl text-sm hover:bg-amber-100 transition-all">
+      <span class="material-symbols-outlined text-base">star</span> Leave a Review
+    </a>
+    {% endif %}
+  </div>
+
+  <!-- Right: Person info -->
+  <div class="space-y-5">
+    <div class="bg-white rounded-2xl border border-outline/10 shadow-sm p-6">
+      {% if user.role == 'tutor' %}
+      <h3 class="font-bold text-sm mb-4 text-on-muted uppercase tracking-wider">Student</h3>
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-14 h-14 rounded-2xl grad flex items-center justify-center text-white font-black text-xl flex-shrink-0">
+          {{ booking.student.username|upper|first }}
+        </div>
+        <div>
+          <p class="font-bold">{{ booking.student.get_full_name|default:booking.student.username }}</p>
+          <p class="text-xs text-on-muted">@{{ booking.student.username }}</p>
+        </div>
+      </div>
+      {% if booking.payment and booking.payment.status == 'approved' %}
+      <div class="space-y-3 pt-3 border-t border-surface-low">
+        <div>
+          <p class="text-xs font-bold text-on-muted mb-0.5">Email</p>
+          <p class="text-sm font-semibold">{{ booking.student.email|default:"Not provided" }}</p>
+        </div>
+        {% if booking.student.email %}
+        <a href="mailto:{{ booking.student.email }}" class="flex items-center gap-2 w-full py-2.5 bg-indigo-50 text-indigo-600 font-bold rounded-xl text-sm hover:bg-indigo-100 transition-all justify-center">
+          <span class="material-symbols-outlined text-base">mail</span> Send Email
+        </a>
+        {% endif %}
+      </div>
+      {% else %}
+      <div class="bg-yellow-50 rounded-xl p-3 text-xs text-yellow-700 font-semibold">
+        Contact details visible after payment approval.
+      </div>
+      {% endif %}
+      {% else %}
+      <h3 class="font-bold text-sm mb-4 text-on-muted uppercase tracking-wider">Tutor</h3>
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-14 h-14 rounded-2xl grad flex items-center justify-center text-white font-black text-xl flex-shrink-0">
+          {{ booking.tutor.username|upper|first }}
+        </div>
+        <div>
+          <p class="font-bold">{{ booking.tutor.get_full_name|default:booking.tutor.username }}</p>
+          {% if booking.tutor.tutor_profile %}
+          <p class="text-xs text-indigo-600 font-semibold">{{ booking.tutor.tutor_profile.subject }}</p>
+          {% endif %}
+        </div>
+      </div>
+      {% if booking.tutor.tutor_profile %}
+      <div class="space-y-2 pt-3 border-t border-surface-low text-sm">
+        <div class="flex justify-between"><span class="text-on-muted">Rating</span><span class="font-bold">★ {{ booking.tutor.tutor_profile.rating }}/5</span></div>
+        <div class="flex justify-between"><span class="text-on-muted">Rate</span><span class="font-black text-indigo-600">৳{{ booking.tutor.tutor_profile.monthly_rate }}/mo</span></div>
+      </div>
+      {% endif %}
+      {% endif %}
+    </div>
+
+    <!-- Payment sidebar - full breakdown -->
+    <div class="bg-white rounded-2xl border border-outline/10 shadow-sm p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-bold text-sm text-on-muted uppercase tracking-wider">Payments</h3>
+        {% if not booking.is_fully_paid and booking.status == 'confirmed' and user == booking.student %}
+        <a href="/payments/create/?booking_id={{ booking.id }}"
+          class="text-xs font-bold grad text-white px-3 py-1.5 rounded-lg hover:opacity-90 transition-all">
+          + Pay
+        </a>
+        {% endif %}
+      </div>
+      <!-- Progress -->
+      <div class="mb-4">
+        <div class="flex justify-between text-xs font-bold text-on-muted mb-1">
+          <span>৳{{ booking.total_paid }} paid</span>
+          <span>৳{{ booking.total_amount }} total</span>
+        </div>
+        <div class="w-full bg-surface-low rounded-full h-2">
+          {% if booking.total_amount > 0 %}
+            {% widthratio booking.total_paid booking.total_amount 100 as pct %}
+            <div class="grad h-2 rounded-full" style="width:{{ pct }}%"></div>
+          {% endif %}
+        </div>
+        {% if booking.balance_due > 0 %}
+        <p class="text-xs text-red-500 font-bold mt-1">৳{{ booking.balance_due }} remaining</p>
+        {% else %}
+        <p class="text-xs text-green-600 font-bold mt-1">✓ Fully paid</p>
+        {% endif %}
+      </div>
+      <!-- Installment list -->
+      {% for p in booking.payments.all %}
+      <div class="border-t border-surface-low py-3 {% if not forloop.first %}mt-0{% endif %}">
+        <div class="flex items-center justify-between mb-1">
+          <span class="font-black text-sm {% if p.status == 'approved' %}text-green-700{% elif p.status == 'rejected' %}text-red-600{% else %}text-amber-700{% endif %}">
+            ৳{{ p.amount }}
+          </span>
+          <span class="text-xs font-black px-2 py-0.5 rounded-full
+            {% if p.status == 'approved' %}bg-green-100 text-green-700
+            {% elif p.status == 'rejected' %}bg-red-100 text-red-700
+            {% else %}bg-amber-100 text-amber-700{% endif %}">
+            {{ p.get_status_display }}
+          </span>
+        </div>
+        <div class="flex justify-between text-xs text-on-muted">
+          <span>Commission: <strong class="text-violet-600">৳{{ p.commission }}</strong></span>
+          {% if p.is_first_payment %}<span class="text-violet-400 font-bold">1st</span>{% endif %}
+        </div>
+        <p class="text-xs text-on-muted mt-0.5">{{ p.get_payment_method_display }} · {{ p.created_at|date:"M d" }}</p>
+      </div>
+      {% empty %}
+      <p class="text-xs text-on-muted text-center py-4">No payments yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

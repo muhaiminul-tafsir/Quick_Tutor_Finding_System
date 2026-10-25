@@ -1,0 +1,140 @@
+{% extends 'base/luminary_base.html' %}
+{% block title %}Edit Profile | QuickTutor{% endblock %}
+{% block page_title %}Edit Profile{% endblock %}
+{% block nav_profile %}bg-white text-indigo-700 shadow-sm{% endblock %}
+{% block mob_profile %}text-indigo-600{% endblock %}
+{% block topbar_action %}
+<a href="/accounts/profile/" class="px-4 py-2 bg-surface-low hover:bg-surface-high font-bold rounded-xl text-sm transition-all flex items-center gap-1">
+  <span class="material-symbols-outlined text-base">arrow_back</span> Profile
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+  <div class="mb-6">
+    <h2 class="text-2xl font-black text-on-surface">Edit Your Profile</h2>
+    <p class="text-sm text-on-muted mt-1">Update your personal information and profile picture.</p>
+  </div>
+
+  <form method="POST" action="/accounts/edit-profile/" enctype="multipart/form-data" class="space-y-5">
+    {% csrf_token %}
+
+    <!-- Avatar Upload Card -->
+    <div class="bg-white rounded-2xl border border-outline/10 shadow-sm p-6">
+      <h3 class="font-bold text-base mb-5 flex items-center gap-2">
+        <span class="material-symbols-outlined text-indigo-500">add_a_photo</span> Profile Picture
+      </h3>
+      <div class="flex items-center gap-6">
+        <!-- Preview -->
+        <div class="relative flex-shrink-0">
+          {% if user.avatar %}
+            <img id="avatar-preview" src="{{ user.avatar.url }}" alt="Avatar"
+                 class="w-24 h-24 rounded-2xl object-cover border-4 border-surface-low shadow-md">
+          {% else %}
+            <div id="avatar-preview-placeholder" class="w-24 h-24 rounded-2xl grad flex items-center justify-center text-white font-black text-4xl border-4 border-surface-low shadow-md">
+              {{ user.username|upper|first }}
+            </div>
+            <img id="avatar-preview" src="" alt="" class="w-24 h-24 rounded-2xl object-cover border-4 border-surface-low shadow-md hidden">
+          {% endif %}
+          <label for="avatar-input" class="absolute -bottom-2 -right-2 w-8 h-8 grad rounded-full flex items-center justify-center text-white cursor-pointer shadow-lg hover:opacity-90 transition-all">
+            <span class="material-symbols-outlined text-sm">edit</span>
+          </label>
+        </div>
+        <!-- Upload area -->
+        <div class="flex-1">
+          <label for="avatar-input" class="block w-full border-2 border-dashed border-outline/40 rounded-xl p-4 text-center cursor-pointer hover:border-indigo-400 hover:bg-indigo-50 transition-all">
+            <span class="material-symbols-outlined text-3xl text-slate-300 mb-1 block">cloud_upload</span>
+            <p class="text-sm font-semibold text-on-muted">Click to upload photo</p>
+            <p class="text-xs text-slate-400 mt-1">JPG, PNG, WEBP · Max 5MB</p>
+          </label>
+          <input type="file" id="avatar-input" name="avatar" accept="image/*" class="hidden"
+                 onchange="previewAvatar(this)">
+        </div>
+      </div>
+    </div>
+
+    <!-- Basic Info -->
+    <div class="bg-white rounded-2xl border border-outline/10 shadow-sm p-6">
+      <h3 class="font-bold text-base mb-5 flex items-center gap-2">
+        <span class="material-symbols-outlined text-indigo-500">badge</span> Basic Information
+      </h3>
+      <div class="grid grid-cols-2 gap-4 mb-4">
+        <div>
+          <label class="block text-xs font-bold text-on-muted uppercase tracking-wider mb-2">First Name</label>
+          <input type="text" name="first_name" value="{{ user.first_name }}"
+            class="w-full px-4 py-3 bg-surface-low border-2 border-outline/30 rounded-xl text-sm font-medium focus:border-indigo-500 focus:bg-white transition-all outline-none"
+            placeholder="First name">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-on-muted uppercase tracking-wider mb-2">Last Name</label>
+          <input type="text" name="last_name" value="{{ user.last_name }}"
+            class="w-full px-4 py-3 bg-surface-low border-2 border-outline/30 rounded-xl text-sm font-medium focus:border-indigo-500 focus:bg-white transition-all outline-none"
+            placeholder="Last name">
+        </div>
+      </div>
+
+      <div class="mb-4">
+        <label class="block text-xs font-bold text-on-muted uppercase tracking-wider mb-2">Email Address</label>
+        <div class="relative">
+          <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg">mail</span>
+          <input type="email" name="email" value="{{ user.email }}"
+            class="w-full pl-11 pr-4 py-3 bg-surface-low border-2 border-outline/30 rounded-xl text-sm font-medium focus:border-indigo-500 focus:bg-white transition-all outline-none"
+            placeholder="your@email.com">
+        </div>
+      </div>
+
+      <div class="mb-4">
+        <label class="block text-xs font-bold text-on-muted uppercase tracking-wider mb-2">Phone Number</label>
+        <div class="relative">
+          <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg">phone</span>
+          <input type="text" name="phone" value="{{ user.phone|default:'' }}"
+            class="w-full pl-11 pr-4 py-3 bg-surface-low border-2 border-outline/30 rounded-xl text-sm font-medium focus:border-indigo-500 focus:bg-white transition-all outline-none"
+            placeholder="01XXXXXXXXX">
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-on-muted uppercase tracking-wider mb-2">Bio</label>
+        <textarea name="bio" rows="3"
+          class="w-full px-4 py-3 bg-surface-low border-2 border-outline/30 rounded-xl text-sm font-medium focus:border-indigo-500 focus:bg-white transition-all outline-none resize-none"
+          placeholder="Tell us a little about yourself...">{{ user.bio|default:'' }}</textarea>
+      </div>
+    </div>
+
+    <!-- Read-only info -->
+    <div class="bg-surface-low rounded-2xl p-5 border border-outline/10">
+      <div class="flex items-center gap-3 text-sm text-on-muted">
+        <span class="material-symbols-outlined text-base">info</span>
+        <span>Username <strong class="text-on-surface">@{{ user.username }}</strong> and role <strong class="text-on-surface capitalize">{{ user.role }}</strong> cannot be changed.</span>
+      </div>
+    </div>
+
+    <div class="flex gap-3 pt-2">
+      <button type="submit" class="flex-1 py-4 grad text-white font-black rounded-xl text-base hover:opacity-90 transition-all shadow-lg shadow-primary/30 active:scale-95">
+        Save Changes
+      </button>
+      <a href="/accounts/profile/" class="px-8 py-4 bg-surface-high text-on-surface font-bold rounded-xl text-base hover:bg-outline/20 transition-all text-center">
+        Cancel
+      </a>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function previewAvatar(input) {
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const preview = document.getElementById('avatar-preview');
+      const placeholder = document.getElementById('avatar-preview-placeholder');
+      preview.src = e.target.result;
+      preview.classList.remove('hidden');
+      if (placeholder) placeholder.classList.add('hidden');
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+</script>
+{% endblock %}

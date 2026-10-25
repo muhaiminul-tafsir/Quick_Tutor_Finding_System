@@ -1,0 +1,108 @@
+{% extends 'base/luminary_base.html' %}
+{% block title %}{{ target_user.username }} | Admin Panel{% endblock %}
+{% block page_title %}User Detail{% endblock %}
+{% block nav_admin_users %}bg-white text-indigo-700 shadow-sm{% endblock %}
+{% block topbar_action %}
+<a href="/admin-panel/users/" class="px-4 py-2 bg-surface-low hover:bg-surface-high font-bold rounded-xl text-sm transition-all flex items-center gap-1">
+  <span class="material-symbols-outlined text-base">arrow_back</span> Users
+</a>
+{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-5">
+  <!-- Profile card -->
+  <div class="rounded-2xl grad text-white p-6 relative overflow-hidden">
+    <div class="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
+    <div class="relative z-10 flex items-center gap-5">
+      <div class="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center text-3xl font-black">
+        {{ target_user.username|first|upper }}
+      </div>
+      <div class="flex-1">
+        <h2 class="text-2xl font-black">{{ target_user.get_full_name|default:target_user.username }}</h2>
+        <p class="text-white/80">@{{ target_user.username }} · {{ target_user.email|default:"no email" }}</p>
+        <div class="flex gap-2 mt-2 flex-wrap">
+          <span class="text-xs bg-white/20 px-3 py-1 rounded-full font-bold">{{ target_user.role|capfirst|default:"Staff" }}</span>
+          {% if target_user.is_superuser %}<span class="text-xs bg-yellow-400/80 px-3 py-1 rounded-full font-bold text-yellow-900">Superuser</span>{% endif %}
+          {% if target_user.is_staff %}<span class="text-xs bg-white/20 px-3 py-1 rounded-full font-bold">Staff</span>{% endif %}
+          <span class="text-xs {% if target_user.is_active %}bg-green-400/80 text-green-900{% else %}bg-red-400/80 text-red-900{% endif %} px-3 py-1 rounded-full font-bold">{% if target_user.is_active %}Active{% else %}Inactive{% endif %}</span>
+        </div>
+      </div>
+      <div class="flex gap-2 shrink-0">
+        <a href="/admin-panel/users/{{ target_user.id }}/edit/" class="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-xl text-sm font-bold transition-all">Edit</a>
+        <a href="/admin-panel/users/{{ target_user.id }}/toggle/" class="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-xl text-sm font-bold transition-all">{% if target_user.is_active %}Deactivate{% else %}Activate{% endif %}</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Info grid -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div class="bg-white rounded-2xl border border-outline/10 p-4 text-center shadow-sm">
+      <p class="text-xs text-on-muted font-bold uppercase tracking-wider">Bookings</p>
+      <p class="text-3xl font-black text-indigo-700 mt-1">{{ bookings|length }}</p>
+    </div>
+    <div class="bg-white rounded-2xl border border-outline/10 p-4 text-center shadow-sm">
+      <p class="text-xs text-on-muted font-bold uppercase tracking-wider">Phone</p>
+      <p class="text-sm font-bold mt-2">{{ target_user.phone|default:"—" }}</p>
+    </div>
+    <div class="bg-white rounded-2xl border border-outline/10 p-4 text-center shadow-sm">
+      <p class="text-xs text-on-muted font-bold uppercase tracking-wider">Joined</p>
+      <p class="text-sm font-bold mt-2">{{ target_user.date_joined|date:"M d, Y" }}</p>
+    </div>
+    <div class="bg-white rounded-2xl border border-outline/10 p-4 text-center shadow-sm">
+      <p class="text-xs text-on-muted font-bold uppercase tracking-wider">Last Login</p>
+      <p class="text-sm font-bold mt-2">{{ target_user.last_login|date:"M d, Y"|default:"Never" }}</p>
+    </div>
+  </div>
+
+  {% if target_user.bio %}
+  <div class="bg-white rounded-2xl border border-outline/10 p-5 shadow-sm">
+    <h3 class="font-bold text-sm mb-2">Bio</h3>
+    <p class="text-sm text-on-muted">{{ target_user.bio }}</p>
+  </div>
+  {% endif %}
+
+  {% if target_user.role == 'tutor' and target_user.tutor_profile %}
+  <div class="bg-white rounded-2xl border border-outline/10 p-5 shadow-sm">
+    <h3 class="font-bold text-sm mb-3">Tutor Profile</h3>
+    <div class="grid grid-cols-3 gap-4 text-center">
+      <div><p class="text-xs text-on-muted">Subject</p><p class="font-bold mt-1">{{ target_user.tutor_profile.subject }}</p></div>
+      <div><p class="text-xs text-on-muted">Monthly Rate</p><p class="font-bold mt-1">৳{{ target_user.tutor_profile.monthly_rate }}</p></div>
+      <div><p class="text-xs text-on-muted">Rating</p><p class="font-bold mt-1">⭐ {{ target_user.tutor_profile.rating }}</p></div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Bookings table -->
+  {% if bookings %}
+  <div class="bg-white rounded-2xl border border-outline/10 shadow-sm overflow-hidden">
+    <div class="px-6 py-4 border-b border-outline/10"><h3 class="font-bold text-sm">Booking History</h3></div>
+    <table class="w-full text-sm">
+      <thead><tr class="bg-surface-low text-xs font-black uppercase text-on-muted">
+        <th class="px-5 py-3 text-left">#</th>
+        <th class="px-5 py-3 text-left">{% if target_user.role == 'student' %}Tutor{% else %}Student{% endif %}</th>
+        <th class="px-5 py-3 text-center">Months</th>
+        <th class="px-5 py-3 text-left">Date</th>
+        <th class="px-5 py-3 text-center">Status</th>
+      </tr></thead>
+      <tbody class="divide-y divide-outline/10">
+        {% for b in bookings %}
+        <tr class="hover:bg-surface-low/60">
+          <td class="px-5 py-3 text-on-muted font-bold">#{{ b.id }}</td>
+          <td class="px-5 py-3 font-semibold">{% if target_user.role == 'student' %}{{ b.tutor.username }}{% else %}{{ b.student.username }}{% endif %}</td>
+          <td class="px-5 py-3 text-center">{{ b.months }}</td>
+          <td class="px-5 py-3 text-xs text-on-muted">{{ b.date|date:"M d, Y" }}</td>
+          <td class="px-5 py-3 text-center"><span class="text-xs font-black px-2.5 py-1 rounded-full {% if b.status == 'confirmed' %}bg-green-100 text-green-700{% elif b.status == 'pending' %}bg-amber-100 text-amber-700{% elif b.status == 'rejected' %}bg-red-100 text-red-600{% else %}bg-slate-100 text-slate-600{% endif %}">{{ b.status|capfirst }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+  <!-- Danger zone -->
+  <div class="bg-red-50 border-2 border-red-100 rounded-2xl p-5">
+    <h3 class="font-black text-red-700 mb-2 flex items-center gap-2"><span class="material-symbols-outlined text-base">warning</span> Danger Zone</h3>
+    <p class="text-sm text-red-600 mb-3">Deleting this user will permanently remove all their data.</p>
+    <a href="/admin-panel/users/{{ target_user.id }}/delete/" class="inline-block px-5 py-2.5 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl text-sm transition-all">Delete User</a>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,103 @@
+{% extends 'base/luminary_base.html' %}
+{% block title %}Bookings | Admin Panel{% endblock %}
+{% block page_title %}Booking Management{% endblock %}
+{% block nav_admin_panel %}bg-white text-indigo-700 shadow-sm{% endblock %}
+{% block topbar_action %}
+<a href="/dashboard/" class="px-4 py-2 bg-surface-low hover:bg-surface-high font-bold rounded-xl text-sm transition-all flex items-center gap-1">
+  <span class="material-symbols-outlined text-base">arrow_back</span> Overview
+</a>
+{% endblock %}
+{% block content %}
+<div class="space-y-5">
+<div class="flex flex-col sm:flex-row sm:items-center gap-4">
+  <div class="flex-1">
+    <h2 class="text-xl font-black">📅 Booking Management</h2>
+    <p class="text-sm text-on-muted">View, filter, and manage all student–tutor bookings</p>
+  </div>
+  <form method="GET" class="flex gap-2 flex-wrap">
+    <input type="text" name="q" value="{{ search }}" placeholder="Student or tutor name…"
+      class="px-4 py-2.5 bg-white border border-outline/30 rounded-xl text-sm focus:border-indigo-500 outline-none w-48">
+    <select name="status" class="px-3 py-2.5 bg-white border border-outline/30 rounded-xl text-sm focus:border-indigo-500 outline-none">
+      <option value="" {% if not status_filter %}selected{% endif %}>All Status</option>
+      <option value="pending"   {% if status_filter == 'pending'   %}selected{% endif %}>Pending</option>
+      <option value="confirmed" {% if status_filter == 'confirmed' %}selected{% endif %}>Confirmed</option>
+      <option value="rejected"  {% if status_filter == 'rejected'  %}selected{% endif %}>Rejected</option>
+      <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+    </select>
+    <button class="px-4 py-2.5 grad text-white rounded-xl text-sm font-bold hover:opacity-90">Filter</button>
+    {% if search or status_filter %}<a href="/admin-panel/bookings/" class="px-4 py-2.5 bg-white border border-outline/30 rounded-xl text-sm font-bold hover:bg-surface-low">Clear</a>{% endif %}
+  </form>
+</div>
+
+<div class="bg-white rounded-2xl border border-outline/10 shadow-sm overflow-hidden">
+  <div class="px-6 py-4 border-b border-outline/10 flex items-center justify-between">
+    <h3 class="font-bold text-sm">All Bookings</h3>
+    <span class="text-xs text-on-muted">{{ bookings|length }} record{{ bookings|length|pluralize }}</span>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead><tr class="bg-surface-low text-xs font-black uppercase tracking-widest text-on-muted">
+        <th class="px-5 py-3 text-left">#</th>
+        <th class="px-5 py-3 text-left">Student</th>
+        <th class="px-5 py-3 text-left">Tutor</th>
+        <th class="px-5 py-3 text-center">Months</th>
+        <th class="px-5 py-3 text-right">Total</th>
+        <th class="px-5 py-3 text-left">Start Date</th>
+        <th class="px-5 py-3 text-center">Status</th>
+        <th class="px-5 py-3 text-center">Change Status</th>
+        <th class="px-5 py-3 text-center">Del</th>
+      </tr></thead>
+      <tbody class="divide-y divide-outline/10">
+        {% for b in bookings %}
+        <tr class="hover:bg-surface-low/60 transition-colors">
+          <td class="px-5 py-4 font-bold text-on-muted text-xs">#{{ b.id }}</td>
+          <td class="px-5 py-4">
+            <a href="/admin-panel/users/{{ b.student.id }}/" class="font-bold hover:text-indigo-600">{{ b.student.username }}</a>
+          </td>
+          <td class="px-5 py-4">
+            <a href="/admin-panel/users/{{ b.tutor.id }}/" class="font-bold hover:text-indigo-600">{{ b.tutor.username }}</a>
+            {% if b.tutor.tutor_profile %}<p class="text-xs text-on-muted">৳{{ b.tutor.tutor_profile.monthly_rate }}/mo</p>{% endif %}
+          </td>
+          <td class="px-5 py-4 text-center font-semibold">{{ b.months }}</td>
+          <td class="px-5 py-4 text-right font-black text-indigo-700">৳{{ b.total_amount }}</td>
+          <td class="px-5 py-4 text-xs text-on-muted whitespace-nowrap">{{ b.date|date:"M d, Y" }}</td>
+          <td class="px-5 py-4 text-center">
+            <span class="text-xs font-black px-2.5 py-1 rounded-full
+              {% if b.status == 'confirmed' %}bg-green-100 text-green-700
+              {% elif b.status == 'pending' %}bg-amber-100 text-amber-700
+              {% elif b.status == 'rejected' %}bg-red-100 text-red-600
+              {% else %}bg-slate-100 text-slate-600{% endif %}">
+              {{ b.status|capfirst }}
+            </span>
+          </td>
+          <td class="px-5 py-4">
+            <div class="flex items-center justify-center gap-1 flex-wrap">
+              {% if b.status != 'confirmed' %}
+              <a href="/admin-panel/bookings/{{ b.id }}/status/confirmed/" class="px-2 py-1 bg-green-500 text-white text-xs font-bold rounded-lg hover:bg-green-600 whitespace-nowrap">✓ Confirm</a>
+              {% endif %}
+              {% if b.status != 'pending' %}
+              <a href="/admin-panel/bookings/{{ b.id }}/status/pending/" class="px-2 py-1 bg-amber-400 text-white text-xs font-bold rounded-lg hover:bg-amber-500 whitespace-nowrap">~ Pending</a>
+              {% endif %}
+              {% if b.status != 'completed' %}
+              <a href="/admin-panel/bookings/{{ b.id }}/status/completed/" class="px-2 py-1 bg-slate-500 text-white text-xs font-bold rounded-lg hover:bg-slate-600 whitespace-nowrap">✓ Complete</a>
+              {% endif %}
+              {% if b.status != 'rejected' %}
+              <a href="/admin-panel/bookings/{{ b.id }}/status/rejected/" class="px-2 py-1 bg-red-500 text-white text-xs font-bold rounded-lg hover:bg-red-600 whitespace-nowrap">✕ Reject</a>
+              {% endif %}
+            </div>
+          </td>
+          <td class="px-5 py-4 text-center">
+            <a href="/admin-panel/bookings/{{ b.id }}/delete/" class="p-1.5 bg-red-50 text-red-500 rounded-lg hover:bg-red-100 inline-flex"><span class="material-symbols-outlined text-sm">delete</span></a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="9" class="px-6 py-16 text-center text-on-muted">
+          <span class="material-symbols-outlined text-5xl text-slate-200 block mb-3">menu_book</span>No bookings found.
+        </td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+{% endblock %}

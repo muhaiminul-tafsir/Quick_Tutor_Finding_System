@@ -1,0 +1,90 @@
+{% extends 'base/luminary_base.html' %}
+{% block title %}Users | Admin Panel{% endblock %}
+{% block page_title %}User Management{% endblock %}
+{% block nav_admin_users %}bg-white text-indigo-700 shadow-sm{% endblock %}
+{% block topbar_action %}
+<a href="/dashboard/" class="px-4 py-2 bg-surface-low hover:bg-surface-high font-bold rounded-xl text-sm transition-all flex items-center gap-1">
+  <span class="material-symbols-outlined text-base">arrow_back</span> Overview
+</a>
+{% endblock %}
+{% block content %}
+<div class="space-y-5">
+<div class="flex flex-col sm:flex-row sm:items-center gap-4">
+  <div class="flex-1">
+    <h2 class="text-xl font-black">👥 User Management</h2>
+    <p class="text-sm text-on-muted">Manage all students, tutors, and staff accounts</p>
+  </div>
+  <form method="GET" class="flex gap-2 flex-wrap">
+    <input type="text" name="q" value="{{ search }}" placeholder="Search username / email…"
+      class="px-4 py-2.5 bg-white border border-outline/30 rounded-xl text-sm focus:border-indigo-500 outline-none w-48">
+    <select name="role" class="px-3 py-2.5 bg-white border border-outline/30 rounded-xl text-sm focus:border-indigo-500 outline-none">
+      <option value="" {% if not role_filter %}selected{% endif %}>All Roles</option>
+      <option value="student" {% if role_filter == 'student' %}selected{% endif %}>Students</option>
+      <option value="tutor"   {% if role_filter == 'tutor'   %}selected{% endif %}>Tutors</option>
+    </select>
+    <button class="px-4 py-2.5 grad text-white rounded-xl text-sm font-bold hover:opacity-90">Filter</button>
+    {% if search or role_filter %}<a href="/admin-panel/users/" class="px-4 py-2.5 bg-white border border-outline/30 rounded-xl text-sm font-bold hover:bg-surface-low">Clear</a>{% endif %}
+  </form>
+</div>
+<div class="bg-white rounded-2xl border border-outline/10 shadow-sm overflow-hidden">
+  <div class="px-6 py-4 border-b border-outline/10 flex items-center justify-between">
+    <h3 class="font-bold text-sm">All Users</h3>
+    <span class="text-xs text-on-muted">{{ users|length }} record{{ users|length|pluralize }}</span>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead><tr class="bg-surface-low text-xs font-black uppercase tracking-widest text-on-muted">
+        <th class="px-5 py-3 text-left">#</th>
+        <th class="px-5 py-3 text-left">Username</th>
+        <th class="px-5 py-3 text-left">Full Name</th>
+        <th class="px-5 py-3 text-left">Email</th>
+        <th class="px-5 py-3 text-center">Role</th>
+        <th class="px-5 py-3 text-center">Status</th>
+        <th class="px-5 py-3 text-center">Staff</th>
+        <th class="px-5 py-3 text-left">Joined</th>
+        <th class="px-5 py-3 text-center">Actions</th>
+      </tr></thead>
+      <tbody class="divide-y divide-outline/10">
+        {% for u in users %}
+        <tr class="hover:bg-surface-low/60 transition-colors">
+          <td class="px-5 py-4 font-bold text-on-muted text-xs">#{{ u.id }}</td>
+          <td class="px-5 py-4">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full grad flex items-center justify-center text-white text-xs font-black flex-shrink-0">{{ u.username|first|upper }}</div>
+              <a href="/admin-panel/users/{{ u.id }}/" class="font-bold hover:text-indigo-600">{{ u.username }}</a>
+            </div>
+          </td>
+          <td class="px-5 py-4 text-on-muted">{{ u.get_full_name|default:"—" }}</td>
+          <td class="px-5 py-4 text-xs text-on-muted">{{ u.email|default:"—" }}</td>
+          <td class="px-5 py-4 text-center">
+            <span class="text-xs font-black px-2.5 py-1 rounded-full {% if u.role == 'student' %}bg-blue-100 text-blue-700{% elif u.role == 'tutor' %}bg-emerald-100 text-emerald-700{% else %}bg-slate-100 text-slate-600{% endif %}">
+              {{ u.role|capfirst|default:"Staff" }}
+            </span>
+          </td>
+          <td class="px-5 py-4 text-center">
+            <span class="text-xs font-black px-2.5 py-1 rounded-full {% if u.is_active %}bg-green-100 text-green-700{% else %}bg-red-100 text-red-600{% endif %}">
+              {% if u.is_active %}Active{% else %}Inactive{% endif %}
+            </span>
+          </td>
+          <td class="px-5 py-4 text-center">{% if u.is_staff or u.is_superuser %}<span class="material-symbols-outlined text-indigo-500 text-base" style="font-variation-settings:'FILL' 1;">shield</span>{% else %}—{% endif %}</td>
+          <td class="px-5 py-4 text-xs text-on-muted whitespace-nowrap">{{ u.date_joined|date:"M d, Y" }}</td>
+          <td class="px-5 py-4">
+            <div class="flex items-center justify-center gap-1">
+              <a href="/admin-panel/users/{{ u.id }}/" class="p-1.5 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100" title="View"><span class="material-symbols-outlined text-sm">visibility</span></a>
+              <a href="/admin-panel/users/{{ u.id }}/edit/" class="p-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100" title="Edit"><span class="material-symbols-outlined text-sm">edit</span></a>
+              <a href="/admin-panel/users/{{ u.id }}/toggle/" class="p-1.5 {% if u.is_active %}bg-amber-50 text-amber-600 hover:bg-amber-100{% else %}bg-green-50 text-green-600 hover:bg-green-100{% endif %} rounded-lg" title="Toggle Active"><span class="material-symbols-outlined text-sm">{% if u.is_active %}block{% else %}check_circle{% endif %}</span></a>
+              <a href="/admin-panel/users/{{ u.id }}/delete/" class="p-1.5 bg-red-50 text-red-500 rounded-lg hover:bg-red-100" title="Delete"><span class="material-symbols-outlined text-sm">delete</span></a>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="9" class="px-6 py-16 text-center text-on-muted">
+          <span class="material-symbols-outlined text-5xl text-slate-200 block mb-3">group</span>No users found.
+        </td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+{% endblock %}

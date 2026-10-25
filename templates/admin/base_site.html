@@ -1,0 +1,745 @@
+{% extends "admin/base.html" %}
+{% load i18n %}
+
+{% block title %}{{ title }} | QuickTutor Admin{% endblock %}
+
+{% block extrastyle %}{{ block.super }}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>
+/* ============================================================
+   QuickTutor Admin — Full UI Redesign
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+:root {
+    --primary:       #3525cd;
+    --primary-dark:  #2518a8;
+    --primary-light: #e9edff;
+    --accent:        #4f46e5;
+    --success:       #22c55e;
+    --warning:       #f59e0b;
+    --danger:        #ef4444;
+    --text:          #141b2b;
+    --muted:         #6b7280;
+    --border:        #e5e7eb;
+    --bg:            #f9f9ff;
+    --white:         #ffffff;
+    --shadow-sm:     0 1px 3px rgba(53,37,205,.08);
+    --shadow-md:     0 4px 20px rgba(53,37,205,.12);
+    --radius:        12px;
+    --radius-sm:     8px;
+}
+
+body, html {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    background: var(--bg) !important;
+    color: var(--text) !important;
+}
+
+/* Global: kill ALL dark backgrounds on table rows everywhere */
+table, thead, tbody, tfoot, tr, th, td {
+    background-color: transparent !important;
+    color: inherit !important;
+}
+
+/* ── Header / Branding ── */
+#header {
+    background: linear-gradient(135deg, #3525cd 0%, #4f46e5 60%, #7c3aed 100%) !important;
+    box-shadow: 0 4px 20px rgba(53,37,205,.35) !important;
+    padding: 0 !important;
+    height: auto !important;
+}
+
+#header a:link, #header a:visited { color: white !important; }
+
+#branding h1,
+#branding h1 a, #branding h1 a:hover {
+    color: white !important;
+    font-weight: 900 !important;
+    font-size: 22px !important;
+    letter-spacing: -0.5px !important;
+    text-decoration: none !important;
+}
+#branding h1::before { content: "📚 "; }
+
+div#header .header-inner,
+.header-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+#user-tools {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 16px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    float: none !important;
+}
+#user-tools a {
+    color: rgba(255,255,255,.85) !important;
+    text-decoration: none !important;
+    transition: color .15s !important;
+    padding: 6px 14px !important;
+    border-radius: 20px !important;
+    border: 1px solid rgba(255,255,255,.2) !important;
+}
+#user-tools a:hover { color: white !important; background: rgba(255,255,255,.15) !important; }
+#user-tools strong { color: white !important; }
+
+/* ── Breadcrumbs ── */
+div.breadcrumbs {
+    background: white !important;
+    border-bottom: 1px solid var(--border) !important;
+    padding: 12px 24px !important;
+    font-size: 13px !important;
+    color: var(--muted) !important;
+    box-shadow: none !important;
+}
+div.breadcrumbs a { color: var(--primary) !important; text-decoration: none !important; font-weight: 600 !important; }
+
+/* ── Layout ── */
+#container { max-width: 1400px !important; margin: 0 auto !important; padding: 0 !important; }
+#content-main { padding: 28px 24px !important; }
+#content { padding: 24px !important; }
+
+#content-related {
+    background: white !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius) !important;
+    padding: 20px !important;
+    box-shadow: var(--shadow-sm) !important;
+}
+
+/* ── Sidebar container ── */
+#nav-sidebar,
+#nav-sidebar *,
+nav#nav-sidebar,
+nav#nav-sidebar * {
+    background: white !important;
+    color: #141b2b !important;
+    border-color: #e5e7eb !important;
+}
+
+#nav-sidebar {
+    border-right: 1px solid #e5e7eb !important;
+    padding: 16px 0 0 !important;
+    min-height: 100vh !important;
+    width: 240px !important;
+    box-shadow: 2px 0 12px rgba(53,37,205,.04) !important;
+}
+
+/* Search filter input */
+#nav-sidebar input[type=search], #nav-sidebar input[type=text] {
+    width: calc(100% - 24px) !important;
+    margin: 0 12px 12px !important;
+    padding: 9px 12px !important;
+    border: 2px solid #e5e7eb !important;
+    border-radius: 10px !important;
+    font-size: 13px !important;
+    font-family: 'Inter', sans-serif !important;
+    background: #f9f9ff !important;
+    color: #141b2b !important;
+    box-sizing: border-box !important;
+    transition: border .15s !important;
+    outline: none !important;
+}
+#nav-sidebar input[type=search]:focus, #nav-sidebar input[type=text]:focus {
+    border-color: #3525cd !important;
+    box-shadow: 0 0 0 3px rgba(53,37,205,.1) !important;
+}
+
+/* App section modules in sidebar */
+nav#nav-sidebar .module,
+nav#nav-sidebar table,
+nav#nav-sidebar th,
+nav#nav-sidebar td,
+nav#nav-sidebar caption {
+    background: white !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+}
+
+/* App section caption / header label */
+nav#nav-sidebar caption,
+nav#nav-sidebar .module caption,
+nav#nav-sidebar caption a,
+nav#nav-sidebar .module caption a {
+    background: white !important;
+    color: #3525cd !important;
+    font-weight: 800 !important;
+    font-size: 10.5px !important;
+    letter-spacing: 1px !important;
+    text-transform: uppercase !important;
+    padding: 16px 16px 6px !important;
+    text-align: left !important;
+    display: block !important;
+    text-decoration: none !important;
+    border-top: 1px solid #f0f1ff !important;
+    margin-top: 4px !important;
+}
+nav#nav-sidebar .module:first-child caption { border-top: none !important; margin-top: 0 !important; }
+
+/* Sidebar nav rows — model links */
+nav#nav-sidebar th,
+nav#nav-sidebar td {
+    padding: 0 !important;
+}
+nav#nav-sidebar th a,
+nav#nav-sidebar td a {
+    color: #374151 !important;
+    padding: 8px 16px 8px 20px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    text-decoration: none !important;
+    transition: all .15s !important;
+    border-left: 3px solid transparent !important;
+    background: white !important;
+    border-radius: 0 !important;
+}
+nav#nav-sidebar th a:hover,
+nav#nav-sidebar td a:hover {
+    background: #f1f3ff !important;
+    color: #3525cd !important;
+    border-left-color: #3525cd !important;
+    font-weight: 600 !important;
+    padding-left: 22px !important;
+}
+
+/* Current app highlight */
+nav#nav-sidebar .current-app caption,
+nav#nav-sidebar .current-app caption a {
+    color: #3525cd !important;
+    background: white !important;
+}
+nav#nav-sidebar .current-app th a,
+nav#nav-sidebar .current-app td a {
+    background: #eef0ff !important;
+    color: #3525cd !important;
+    border-left-color: #3525cd !important;
+    font-weight: 600 !important;
+}
+
+/* "Add" links shown in the sidebar */
+nav#nav-sidebar td a.addlink {
+    color: #16a34a !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    padding: 4px 10px !important;
+    background: #f0fdf4 !important;
+    border-radius: 20px !important;
+    border-left: none !important;
+}
+nav#nav-sidebar td a.addlink:hover {
+    background: #22c55e !important;
+    color: white !important;
+    border-left: none !important;
+    padding-left: 10px !important;
+}
+
+/* Toggle button */
+.sidebar-toggle-container {
+    background: white !important;
+    border-right: 1px solid #e5e7eb !important;
+    position: relative !important;
+}
+button#toggle-nav-sidebar {
+    background: white !important;
+    border: 2px solid #e5e7eb !important;
+    border-radius: 50% !important;
+    color: #3525cd !important;
+    width: 30px !important;
+    height: 30px !important;
+    cursor: pointer !important;
+    box-shadow: 0 2px 8px rgba(53,37,205,.1) !important;
+    font-size: 14px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all .15s !important;
+}
+button#toggle-nav-sidebar:hover {
+    background: #3525cd !important;
+    color: white !important;
+    border-color: #3525cd !important;
+}
+
+/* ── Modules / Cards (content area) ── */
+.module {
+    background: white !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius) !important;
+    box-shadow: var(--shadow-sm) !important;
+    margin-bottom: 20px !important;
+    overflow: hidden !important;
+}
+.module h2, .module caption,
+.module h2 a, .module caption a {
+    background: linear-gradient(135deg, #3525cd, #4f46e5) !important;
+    color: white !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    letter-spacing: .3px !important;
+    padding: 14px 20px !important;
+    text-align: left !important;
+    display: block !important;
+    text-decoration: none !important;
+}
+.module table { border: none !important; border-radius: 0 !important; }
+
+/* Re-override sidebar modules back to white (undo the above for sidebar) */
+nav#nav-sidebar .module,
+nav#nav-sidebar .module h2,
+nav#nav-sidebar .module caption,
+nav#nav-sidebar .module caption a,
+nav#nav-sidebar .module h2 a {
+    background: white !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    color: #3525cd !important;
+    font-size: 10.5px !important;
+    font-weight: 800 !important;
+    letter-spacing: 1px !important;
+    padding: 16px 16px 6px !important;
+    border-top: 1px solid #f0f1ff !important;
+    text-transform: uppercase !important;
+    display: block !important;
+    text-decoration: none !important;
+}
+
+/* ── Tables — nuclear white override ── */
+/* Force ALL table rows/cells in the content area to white first */
+#content table,
+#content-main table,
+#changelist-form table {
+    background: white !important;
+    color: #141b2b !important;
+    border-collapse: collapse !important;
+}
+
+#content table tr,
+#content-main table tr,
+#changelist-form table tr,
+#result_list tr,
+#result_list tr.row1,
+#result_list tr.row2,
+#result_list tbody tr {
+    background: white !important;
+    color: #141b2b !important;
+}
+
+#content table td,
+#content table th,
+#content-main table td,
+#content-main table th,
+#changelist-form table td,
+#changelist-form table th,
+#result_list td,
+#result_list th,
+#result_list tbody td,
+#result_list tbody th {
+    background: white !important;
+    color: #141b2b !important;
+    border-bottom: 1px solid #f0f1ff !important;
+    padding: 13px 16px !important;
+    font-size: 13px !important;
+    vertical-align: middle !important;
+}
+
+/* Zebra stripe — subtle */
+#result_list tr.row2 td,
+#result_list tr.row2 th {
+    background: #fafbff !important;
+}
+
+/* Hover */
+#result_list tbody tr:hover td,
+#result_list tbody tr:hover th {
+    background: #f1f3ff !important;
+    transition: background .1s !important;
+}
+
+/* Header row */
+#result_list thead th {
+    background: linear-gradient(135deg, #f1f3ff, #e9edff) !important;
+    color: #3525cd !important;
+    font-weight: 700 !important;
+    font-size: 12px !important;
+    letter-spacing: .5px !important;
+    text-transform: uppercase !important;
+    padding: 14px 16px !important;
+    border-bottom: 2px solid #dde0ff !important;
+}
+#result_list thead th a { color: #3525cd !important; text-decoration: none !important; }
+#result_list thead th.sorted { background: #e4e7ff !important; }
+#result_list thead th.sorted a { color: #2518a8 !important; }
+
+/* Cell links */
+#result_list td a {
+    color: #3525cd !important;
+    font-weight: 600 !important;
+    text-decoration: none !important;
+}
+#result_list td a:hover { text-decoration: underline !important; color: #2518a8 !important; }
+
+/* Checkbox column */
+#result_list th input[type=checkbox],
+#result_list td input[type=checkbox] {
+    width: 16px !important;
+    height: 16px !important;
+    accent-color: #3525cd !important;
+    cursor: pointer !important;
+}
+
+.module table { border: none !important; border-radius: 0 !important; }
+td a:hover { text-decoration: underline !important; }
+
+/* ── Change list actions ── */
+#changelist-filter {
+    background: white !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius) !important;
+    padding: 0 !important;
+    box-shadow: var(--shadow-sm) !important;
+    overflow: hidden !important;
+}
+#changelist-filter h2 {
+    background: linear-gradient(135deg, #3525cd, #4f46e5) !important;
+    color: white !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    letter-spacing: .5px !important;
+    text-transform: uppercase !important;
+    padding: 14px 16px !important;
+    margin: 0 !important;
+}
+#changelist-filter h3 {
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: .5px !important;
+    color: var(--muted) !important;
+    padding: 12px 16px 6px !important;
+    margin: 0 !important;
+}
+#changelist-filter ul { list-style: none !important; padding: 0 0 8px !important; margin: 0 !important; }
+#changelist-filter ul li a {
+    color: var(--text) !important;
+    padding: 8px 16px !important;
+    display: block !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    text-decoration: none !important;
+    transition: all .15s !important;
+}
+#changelist-filter ul li a:hover, #changelist-filter ul li.selected a {
+    background: var(--primary-light) !important;
+    color: var(--primary) !important;
+    font-weight: 700 !important;
+}
+
+/* ── Action Toolbar ── */
+#toolbar { background: white !important; border-bottom: 1px solid var(--border) !important; padding: 12px 0 !important; }
+#toolbar form input[type=text], #searchbar {
+    border: 2px solid var(--border) !important;
+    border-radius: 10px !important;
+    padding: 10px 14px !important;
+    font-size: 13px !important;
+    font-family: 'Inter', sans-serif !important;
+    color: var(--text) !important;
+    background: white !important;
+    transition: border .15s !important;
+}
+#toolbar form input[type=text]:focus, #searchbar:focus {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 3px rgba(53,37,205,.12) !important;
+    outline: none !important;
+}
+#toolbar form button, #searchbar + button {
+    background: var(--primary) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 10px !important;
+    padding: 10px 18px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    font-family: 'Inter', sans-serif !important;
+    cursor: pointer !important;
+    margin-left: 6px !important;
+    transition: all .15s !important;
+}
+#toolbar form button:hover { background: var(--primary-dark) !important; transform: translateY(-1px) !important; }
+
+/* ── Buttons ── */
+.button, input[type=submit], input[type=button], .submit-row input, a.button {
+    background: var(--primary) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 10px !important;
+    padding: 10px 20px !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    font-family: 'Inter', sans-serif !important;
+    cursor: pointer !important;
+    transition: all .15s !important;
+    text-decoration: none !important;
+    display: inline-block !important;
+}
+.button:hover, input[type=submit]:hover, a.button:hover {
+    background: var(--primary-dark) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(53,37,205,.3) !important;
+}
+.button.default { background: var(--primary) !important; }
+.deletelink, .button.deletelink-box, a.deletelink {
+    background: var(--danger) !important;
+    color: white !important;
+}
+.deletelink:hover { background: #dc2626 !important; }
+
+/* Save buttons */
+.submit-row {
+    background: var(--primary-light) !important;
+    border-radius: 0 0 var(--radius) var(--radius) !important;
+    padding: 14px 20px !important;
+    border-top: 1px solid var(--border) !important;
+    display: flex !important;
+    gap: 10px !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+}
+.submit-row p { margin: 0 !important; }
+.submit-row a.closelink {
+    background: #e5e7eb !important;
+    color: var(--text) !important;
+    padding: 10px 18px !important;
+    border-radius: 10px !important;
+    font-weight: 600 !important;
+    text-decoration: none !important;
+}
+
+/* ── Forms ── */
+fieldset {
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius) !important;
+    background: white !important;
+    padding: 20px !important;
+    margin-bottom: 20px !important;
+}
+fieldset h2 {
+    background: var(--primary-light) !important;
+    color: var(--primary) !important;
+    border-radius: var(--radius-sm) !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    padding: 10px 14px !important;
+    margin: -20px -20px 20px !important;
+}
+.form-row label {
+    font-weight: 600 !important;
+    color: var(--text) !important;
+    font-size: 13px !important;
+}
+input[type=text], input[type=password], input[type=email], input[type=number],
+input[type=url], select, textarea {
+    border: 2px solid var(--border) !important;
+    border-radius: 10px !important;
+    padding: 10px 14px !important;
+    font-size: 13px !important;
+    font-family: 'Inter', sans-serif !important;
+    color: var(--text) !important;
+    background: white !important;
+    transition: border .15s !important;
+}
+input:focus, select:focus, textarea:focus {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 3px rgba(53,37,205,.12) !important;
+    outline: none !important;
+}
+.errornote, .errorlist {
+    background: #fff0f0 !important;
+    border: 1px solid #fca5a5 !important;
+    border-radius: var(--radius-sm) !important;
+    color: var(--danger) !important;
+    padding: 10px 14px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+}
+.successnote, .messagelist .success {
+    background: #f0fdf4 !important;
+    border: 1px solid #86efac !important;
+    border-radius: var(--radius-sm) !important;
+    color: #166534 !important;
+    padding: 10px 14px !important;
+    font-weight: 600 !important;
+}
+
+/* Message list */
+ul.messagelist { padding: 0 0 16px !important; list-style: none !important; }
+ul.messagelist li {
+    background: #f0fdf4 !important;
+    border: 1px solid #86efac !important;
+    border-radius: var(--radius-sm) !important;
+    color: #166534 !important;
+    padding: 12px 16px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    margin-bottom: 8px !important;
+}
+ul.messagelist li.error { background: #fff0f0 !important; border-color: #fca5a5 !important; color: var(--danger) !important; }
+ul.messagelist li.warning { background: #fffbeb !important; border-color: #fcd34d !important; color: #92400e !important; }
+
+/* ── Pagination ── */
+.paginator {
+    background: white !important;
+    border-top: 1px solid var(--border) !important;
+    padding: 16px !important;
+    font-size: 13px !important;
+    color: var(--muted) !important;
+}
+.paginator a {
+    color: var(--primary) !important;
+    padding: 6px 12px !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 8px !important;
+    text-decoration: none !important;
+    font-weight: 600 !important;
+    transition: all .15s !important;
+}
+.paginator a:hover, .paginator .this-page {
+    background: var(--primary) !important;
+    color: white !important;
+    border-color: var(--primary) !important;
+}
+
+/* ── Object tools ── */
+ul.object-tools {
+    list-style: none !important;
+    display: flex !important;
+    gap: 8px !important;
+    padding: 0 !important;
+    margin: 0 0 20px !important;
+}
+ul.object-tools a {
+    background: var(--primary) !important;
+    color: white !important;
+    border-radius: 10px !important;
+    padding: 8px 16px !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    text-decoration: none !important;
+    transition: all .15s !important;
+}
+ul.object-tools a:hover { background: var(--primary-dark) !important; transform: translateY(-1px) !important; }
+ul.object-tools a.addlink { background: var(--success) !important; }
+ul.object-tools a.addlink:hover { background: #16a34a !important; }
+
+/* ── Actions row ── */
+.actions {
+    background: var(--primary-light) !important;
+    border: 1px solid #c7c4d8 !important;
+    border-radius: var(--radius-sm) !important;
+    padding: 10px 16px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    flex-wrap: wrap !important;
+}
+.actions label { font-weight: 600 !important; font-size: 13px !important; color: var(--primary) !important; margin: 0 !important; }
+.actions select {
+    border-radius: 8px !important;
+    padding: 8px 12px !important;
+    border: 2px solid var(--border) !important;
+    font-size: 13px !important;
+}
+.actions button {
+    background: var(--primary) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 8px 16px !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+}
+
+/* ── Inline admin ── */
+.inline-group {
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius) !important;
+    overflow: hidden !important;
+    margin-bottom: 20px !important;
+}
+.inline-group h2 {
+    background: linear-gradient(135deg, #3525cd, #4f46e5) !important;
+    color: white !important;
+    padding: 14px 20px !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    margin: 0 !important;
+}
+.inline-related {
+    border-bottom: 1px solid var(--border) !important;
+    padding: 16px !important;
+    background: white !important;
+    transition: background .15s !important;
+}
+.inline-related:hover { background: #fafbff !important; }
+.inline-related h3 { font-size: 13px !important; font-weight: 700 !important; color: var(--primary) !important; margin-bottom: 12px !important; }
+
+/* ── Status indicators ── */
+img.object-image { border-radius: 8px !important; }
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+    #user-tools { gap: 8px !important; }
+    #content-main { padding: 16px !important; }
+    #nav-sidebar { width: 200px !important; }
+}
+
+/* ── Select2 / Calendar ── */
+.calendarbox, .clockbox {
+    border-radius: var(--radius) !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: var(--shadow-md) !important;
+}
+.calendar caption { background: linear-gradient(135deg, #3525cd, #4f46e5) !important; color: white !important; }
+.calendar td a { border-radius: 6px !important; }
+.calendar td a:hover, .calendar td.selected a { background: var(--primary) !important; color: white !important; }
+
+/* ── Footer ── */
+#footer {
+    background: white !important;
+    border-top: 1px solid var(--border) !important;
+    color: var(--muted) !important;
+    font-size: 12px !important;
+    text-align: center !important;
+    padding: 16px !important;
+}
+</style>
+{% endblock %}
+
+{% block branding %}
+<div style="display:flex; align-items:center; gap:12px;">
+    <a href="{% url 'admin:index' %}" style="color:white; text-decoration:none; font-weight:900; font-size:20px; letter-spacing:-0.5px; display:flex; align-items:center; gap:8px;">
+        <span style="font-size:24px;">📚</span> QuickTutor
+    </a>
+    <span style="color:rgba(255,255,255,.4); margin:0 4px;">|</span>
+    <span style="color:rgba(255,255,255,.7); font-size:13px; font-weight:600;">Admin Panel</span>
+</div>
+{% endblock %}

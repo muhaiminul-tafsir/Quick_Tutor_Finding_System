@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>{% block title %}QuickTutor{% endblock %}</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif']},colors:{primary:'#3525cd','primary-dark':'#2518a8',surface:'#f9f9ff','surface-low':'#f1f3ff','surface-high':'#e1e8fd','on-surface':'#141b2b','on-muted':'#464555',outline:'#c7c4d8'}}}}
+</script>
+<style>
+body{font-family:'Inter',sans-serif;}
+.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}
+.grad{background:linear-gradient(135deg,#3525cd 0%,#4f46e5 100%);}
+.hide-scroll::-webkit-scrollbar{display:none;}
+.hide-scroll{-ms-overflow-style:none;scrollbar-width:none;}
+{% block extra_style %}{% endblock %}
+</style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen">
+<div class="flex min-h-screen">
+
+<!-- Sidebar -->
+<aside class="hidden md:flex h-screen w-64 flex-col p-6 space-y-6 bg-surface-low sticky top-0 border-r border-outline/30">
+  <a href="/" class="flex items-center gap-3 px-2">
+    <div class="w-8 h-8 rounded-lg grad flex items-center justify-center text-white flex-shrink-0">
+      <span class="material-symbols-outlined text-sm">school</span>
+    </div>
+    <span class="text-lg font-bold text-indigo-900">QuickTutor</span>
+  </a>
+  <nav class="space-y-1 flex-1">
+    <a href="/dashboard/" class="flex items-center gap-3 px-4 py-3 {% block nav_dashboard %}text-slate-500 hover:text-indigo-600 hover:bg-white/60{% endblock %} rounded-xl text-sm font-semibold transition-all hover:translate-x-1">
+      <span class="material-symbols-outlined">dashboard</span> Dashboard
+    </a>
+    {% if user.is_superuser or user.is_staff %}
+    <a href="/payments/manage/" class="flex items-center gap-3 px-4 py-3 {% block nav_pay_admin %}text-slate-500 hover:text-indigo-600 hover:bg-white/60{% endblock %} rounded-xl text-sm font-semibold transition-all hover:translate-x-1">
+      <span class="material-symbols-outlined">payments</span> Payment Review
+    </a>
+    <a href="/admin-panel/users/" class="flex items-center gap-3 px-4 py-3 {% block nav_admin_users %}text-slate-500 hover:text-indigo-600 hover:bg-white/60{% endblock %} rounded-xl text-sm font-semibold transition-all hover:translate-x-1">
+      <span class="material-symbols-outlined">manage_accounts</span> User Management
+    </a>
+    <a href="/admin-panel/bookings/" class="flex items-center gap-3 px-4 py-3 {% block nav_all_bookings %}text-slate-500 hover:text-indigo-600 hover:bg-white/60{% endblock %} rounded-xl text-sm font-semibold transition-all hover:translate-x-1">
+      <span class="material-symbols-outlined">book_online</span> All Bookings
+    </a>
+    <a href="/admin-panel/tutors/" class="flex items-center gap-3 px-4 py-3 {% block nav_admin_tutors %}text-slate-500 hover:text-indigo-600 hover:bg-white/60{% endblock %} rounded-xl text-sm font-semibold transition-all hover:translate-x-1">
+      <span class="material-symbols-outlined">school</span> Tutor Profiles
+    </a>
+    <a href="/admin-panel/reviews/" class="flex items-center gap-3 px-4 py-3 {% block nav_admin_reviews %}text-slate-500 hover:text-indigo-600 hover:bg-white/60{% endblock %} rounded-xl text-sm font-semibold transition-all hover:translate-x-1">
+      <span class="material-symbols-outlined">star_rate</span> Reviews
+    </a>
+    {% elif user.role == 'student' %}
+    <a href="/tutors/" class="flex items-center gap-3 px-4 py-3 {% block nav_tutors %}text-slate-500 hover:text-indigo-600 hover:bg-white/60{% endblock %} rounded-xl text-sm font-semibold transition-all hover:translate-x-1">
+      <span class="material-symbols-outlined">search</span> Find Tutors
+    </a>
+    <a href="/bookings/" class="flex items-center gap-3 px-4 py-3 {% block nav_bookings %}text-slate-500 hover:text-indigo-600 hover:bg-white/60{% endblock %} rounded-xl text-sm font-semibold transition-all hover:translate-x-1">
+      <span class="material-symbols-outlined">menu_book</span> My Bookings
+    </a>
+    <a href="/payments/" class="flex items-center gap-3 px-4 py-3 {% block nav_payments %}text-slate-500 hover:text-indigo-600 hover:bg-white/60{% endblock %} rounded-xl text-sm font-semibold transition-all hover:translate-x-1">
+      <span class="material-symbols-outlined">payments</span> Payments
+    </a>
+    {% else %}
+    <a href="/bookings/" class="flex items-center gap-3 px-4 py-3 {% block nav_students %}text-slate-500 hover:text-indigo-600 hover:bg-white/60{% endblock %} rounded-xl text-sm font-semibold transition-all hover:translate-x-1">
+      <span class="material-symbols-outlined">groups</span> My Students
+    </a>
+    <a href="/tutors/edit-profile/" class="flex items-center gap-3 px-4 py-3 {% block nav_edit_profile %}text-slate-500 hover:text-indigo-600 hover:bg-white/60{% endblock %} rounded-xl text-sm font-semibold transition-all hover:translate-x-1">
+      <span class="material-symbols-outlined">manage_accounts</span> Tutor Profile
+    </a>
+    {% endif %}
+    <a href="/accounts/profile/" class="flex items-center gap-3 px-4 py-3 {% block nav_profile %}text-slate-500 hover:text-indigo-600 hover:bg-white/60{% endblock %} rounded-xl text-sm font-semibold transition-all hover:translate-x-1">
+      <span class="material-symbols-outlined">person</span> My Profile
+    </a>
+  </nav>
+  <div class="border-t border-outline/20 pt-4">
+    <div class="flex items-center gap-3 px-3 mb-3">
+      {% if user.avatar %}
+        <img src="{{ user.avatar.url }}" alt="{{ user.username }}"
+             class="w-10 h-10 rounded-full object-cover flex-shrink-0 border-2 border-outline/20">
+      {% else %}
+        <div class="w-10 h-10 rounded-full grad flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+          {{ user.username|upper|first }}
+        </div>
+      {% endif %}
+      <div class="min-w-0">
+        <p class="text-sm font-bold truncate">{{ user.get_full_name|default:user.username }}</p>
+        <p class="text-xs text-on-muted capitalize">{% if user.is_superuser or user.is_staff %}Admin{% else %}{{ user.role }}{% endif %}</p>
+      </div>
+    </div>
+    <a href="/accounts/logout/" class="flex items-center gap-3 px-4 py-2 text-slate-500 hover:text-red-500 text-sm font-semibold rounded-xl transition-all">
+      <span class="material-symbols-outlined">logout</span> Logout
+    </a>
+  </div>
+</aside>
+
+<!-- Main -->
+<main class="flex-1 min-h-screen overflow-y-auto pb-20 md:pb-0">
+  <!-- Topbar -->
+  <header class="sticky top-0 z-50 bg-surface/90 backdrop-blur border-b border-outline/20 flex items-center justify-between px-6 md:px-8 py-4">
+    <div class="flex items-center gap-3">
+      <div class="md:hidden w-7 h-7 rounded-lg grad flex items-center justify-center text-white flex-shrink-0">
+        <span class="material-symbols-outlined text-sm">school</span>
+      </div>
+      <h1 class="text-base font-bold text-on-surface">{% block page_title %}QuickTutor{% endblock %}</h1>
+    </div>
+    <div class="flex items-center gap-3">
+      {% block topbar_action %}{% endblock %}
+      <a href="/accounts/profile/" class="flex-shrink-0">
+        {% if user.avatar %}
+          <img src="{{ user.avatar.url }}" alt="{{ user.username }}"
+               class="w-9 h-9 rounded-full object-cover border-2 border-outline/20 hover:ring-2 hover:ring-primary transition-all">
+        {% else %}
+          <div class="w-9 h-9 grad rounded-full flex items-center justify-center text-white font-bold text-sm hover:opacity-90 transition-all">
+            {{ user.username|upper|first }}
+          </div>
+        {% endif %}
+      </a>
+    </div>
+  </header>
+
+  <div class="px-6 md:px-8 py-6 md:py-8 max-w-screen-xl mx-auto">
+    {% if messages %}
+      {% for msg in messages %}
+      <div class="mb-5 px-5 py-3 rounded-2xl text-sm font-semibold flex items-start gap-3
+        {% if 'error' in msg.tags %}bg-red-50 border border-red-200 text-red-800
+        {% elif 'warning' in msg.tags %}bg-amber-50 border border-amber-200 text-amber-800
+        {% else %}bg-green-50 border border-green-200 text-green-800{% endif %}">
+        <span class="material-symbols-outlined text-base mt-0.5 flex-shrink-0">
+          {% if 'error' in msg.tags %}error{% elif 'warning' in msg.tags %}warning{% else %}check_circle{% endif %}
+        </span>
+        <span>{{ msg }}</span>
+      </div>
+      {% endfor %}
+    {% endif %}
+    {% block content %}{% endblock %}
+  </div>
+</main>
+</div>
+
+<!-- Mobile Nav -->
+<nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t border-outline/20 px-4 py-2 flex justify-around items-center z-50">
+  <a href="/dashboard/" class="flex flex-col items-center gap-0.5 {% block mob_dashboard %}text-slate-400{% endblock %}">
+    <span class="material-symbols-outlined text-xl">dashboard</span>
+    <span class="text-[10px] font-bold">Home</span>
+  </a>
+  {% if user.is_superuser or user.is_staff %}
+  <a href="/payments/manage/" class="flex flex-col items-center gap-0.5 text-slate-400">
+    <span class="material-symbols-outlined text-xl">payments</span>
+    <span class="text-[10px] font-bold">Payments</span>
+  </a>
+  <a href="/admin/" class="flex flex-col items-center -mt-6">
+    <div class="w-12 h-12 grad rounded-full flex items-center justify-center text-white shadow-lg shadow-primary/30">
+      <span class="material-symbols-outlined">admin_panel_settings</span>
+    </div>
+  </a>
+  <a href="/bookings/" class="flex flex-col items-center gap-0.5 text-slate-400">
+    <span class="material-symbols-outlined text-xl">book_online</span>
+    <span class="text-[10px] font-bold">Bookings</span>
+  </a>
+  {% elif user.role == 'student' %}
+  <a href="/bookings/" class="flex flex-col items-center gap-0.5 {% block mob_bookings %}text-slate-400{% endblock %}">
+    <span class="material-symbols-outlined text-xl">menu_book</span>
+    <span class="text-[10px] font-bold">Bookings</span>
+  </a>
+  <a href="/tutors/" class="flex flex-col items-center -mt-6">
+    <div class="w-12 h-12 grad rounded-full flex items-center justify-center text-white shadow-lg shadow-primary/30">
+      <span class="material-symbols-outlined">search</span>
+    </div>
+  </a>
+  <a href="/payments/" class="flex flex-col items-center gap-0.5 {% block mob_payments %}text-slate-400{% endblock %}">
+    <span class="material-symbols-outlined text-xl">payments</span>
+    <span class="text-[10px] font-bold">Payments</span>
+  </a>
+  {% else %}
+  <a href="/bookings/" class="flex flex-col items-center gap-0.5 {% block mob_students %}text-slate-400{% endblock %}">
+    <span class="material-symbols-outlined text-xl">groups</span>
+    <span class="text-[10px] font-bold">Students</span>
+  </a>
+  <a href="/tutors/edit-profile/" class="flex flex-col items-center -mt-6">
+    <div class="w-12 h-12 grad rounded-full flex items-center justify-center text-white shadow-lg shadow-primary/30">
+      <span class="material-symbols-outlined">edit</span>
+    </div>
+  </a>
+  {% endif %}
+  <a href="/accounts/profile/" class="flex flex-col items-center gap-0.5 {% block mob_profile %}text-slate-400{% endblock %}">
+    <span class="material-symbols-outlined text-xl">person</span>
+    <span class="text-[10px] font-bold">Profile</span>
+  </a>
+</nav>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>

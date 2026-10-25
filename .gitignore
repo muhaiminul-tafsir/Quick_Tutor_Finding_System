@@ -1,0 +1,15 @@
+instruction.md
+main.py
+set_admin_password.py
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+admin_password.txt
+TEMPLATES.md
+SETUP_COMPLETE.md
+.idea/
+.claude/
+.vscode/

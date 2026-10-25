@@ -1,0 +1,31 @@
+{% extends 'base/luminary_base.html' %}
+{% block title %}Confirm Delete | Admin Panel{% endblock %}
+{% block page_title %}Confirm Delete{% endblock %}
+{% block nav_admin_panel %}bg-white text-indigo-700 shadow-sm{% endblock %}
+{% block content %}
+<div class="max-w-md mx-auto">
+  <div class="bg-white rounded-2xl border-2 border-red-100 shadow-sm overflow-hidden">
+    <div class="p-6 text-center space-y-4">
+      <div class="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto">
+        <span class="material-symbols-outlined text-3xl text-red-500">delete_forever</span>
+      </div>
+      <h2 class="text-xl font-black text-red-700">Delete {{ obj_type }}?</h2>
+      <p class="text-sm text-on-muted">
+        You are about to permanently delete <strong>{{ obj }}</strong>.<br>
+        This action <strong>cannot be undone</strong>.
+      </p>
+      <div class="flex gap-3 pt-2">
+        <form method="POST" class="flex-1">
+          {% csrf_token %}
+          <button type="submit" class="w-full py-3 bg-red-500 hover:bg-red-600 text-white font-black rounded-xl transition-all">
+            Yes, Delete
+          </button>
+        </form>
+        <a href="{{ cancel_url }}" class="flex-1 py-3 bg-surface-low text-on-surface font-bold rounded-xl hover:bg-surface-high transition-all text-sm text-center leading-[1.75rem]">
+          Cancel
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

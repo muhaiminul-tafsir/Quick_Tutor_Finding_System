@@ -1,0 +1,330 @@
+{% extends 'base/luminary_base.html' %}
+{% load static %}
+
+{% block title %}Make Payment | QuickTutor{% endblock %}
+{% block page_title %}Payment{% endblock %}
+{% block topbar_action %}
+<a href="/bookings/{{ booking.id }}/"
+  class="px-4 py-2 bg-surface-low hover:bg-surface-high font-bold rounded-xl text-sm transition-all flex items-center gap-1">
+  <span class="material-symbols-outlined text-base">arrow_back</span> Booking
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto space-y-5">
+
+  <!-- Booking Summary Banner -->
+  <div class="rounded-2xl grad text-white p-6 relative overflow-hidden">
+    <div class="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2">
+    </div>
+    <div class="relative z-10">
+      <p class="text-white/70 text-xs font-bold uppercase tracking-widest mb-1">Booking #{{ booking.id }}</p>
+      <h2 class="text-2xl font-black mb-1">{{ booking.tutor.get_full_name|default:booking.tutor.username }}</h2>
+      <p class="text-white/80 text-sm">{{ booking.months }} month{{ booking.months|pluralize }} · ৳{{ monthly_rate
+        }}/month</p>
+    </div>
+    <!-- Progress bar -->
+    <div class="relative z-10 mt-5">
+      <div class="flex justify-between text-xs font-bold mb-1">
+        <span>Paid: ৳{{ total_paid }}</span>
+        <span>Total: ৳{{ total_amount }}</span>
+      </div>
+      <div class="w-full bg-white/20 rounded-full h-2.5">
+        {% if total_amount > 0 %}
+        {% widthratio total_paid total_amount 100 as pct %}
+        <div class="bg-white h-2.5 rounded-full transition-all" style="width:{{ pct }}%"></div>
+        {% endif %}
+      </div>
+      <p class="text-right text-xs text-white/70 mt-1">
+        Balance due: <strong class="text-white">৳{{ balance_due }}</strong>
+      </p>
+    </div>
+  </div>
+
+  {% if pending_payment %}
+  <!-- ── BLOCKED: Pending payment awaiting review ── -->
+  <div class="rounded-2xl bg-amber-50 border-2 border-amber-200 p-8 text-center space-y-3">
+    <span class="material-symbols-outlined text-6xl text-amber-400 block"
+      style="font-variation-settings:'FILL' 1;">hourglass_top</span>
+    <p class="font-black text-amber-800 text-xl">Awaiting Admin Review</p>
+    <p class="text-sm text-amber-700 max-w-sm mx-auto">
+      Your payment of <strong>৳{{ pending_payment.amount }}</strong> submitted on
+      {{ pending_payment.created_at|date:"M d, Y" }} is under review.
+    </p>
+    <div class="inline-flex items-center gap-2 bg-amber-100 rounded-xl px-4 py-2 text-sm font-bold text-amber-800">
+      <span class="material-symbols-outlined text-sm">schedule</span>
+      Once approved, you can pay the remaining <strong>৳{{ balance_due }}</strong>
+    </div>
+    <div class="pt-2">
+      <a href="/bookings/{{ booking.id }}/"
+        class="inline-block px-8 py-3 grad text-white font-bold rounded-xl text-sm hover:opacity-90 transition-all shadow-lg shadow-primary/20">
+        View Booking Details
+      </a>
+    </div>
+    <!-- Commission Explainer -->
+    <div
+      class="rounded-2xl border-2 {% if not first_month_covered %}border-violet-200 bg-violet-50{% else %}border-blue-100 bg-blue-50{% endif %} p-5">
+      <div class="flex items-start gap-3">
+        <span
+          class="material-symbols-outlined {% if not first_month_covered %}text-violet-600{% else %}text-blue-600{% endif %} text-2xl mt-0.5">info</span>
+        <div class="flex-1">
+          {% if not first_month_covered %}
+          <p class="font-black text-violet-800 text-sm mb-2">First Month Covered by This Payment</p>
+          <div class="text-xs text-violet-700 space-y-1">
+            <div class="flex justify-between"><span>Monthly rate</span><strong>৳{{ monthly_rate }}</strong></div>
+            <div class="flex justify-between"><span>First month: broker (40%) + platform (10%)</span><strong
+                class="text-red-600">50% = ৳{{ preview_first_commission }}</strong></div>
+            <div class="flex justify-between"><span>Any remaining amount in payment</span><strong
+                class="text-orange-600">10% platform</strong></div>
+          </div>
+          <p class="text-xs text-violet-600 mt-2 bg-violet-100 rounded-lg px-3 py-1.5">
+            e.g. Pay ৳{{ monthly_rate|add:monthly_rate }} → ৳{{ preview_first_commission }} (1st mo.) + ৳{{ monthly_rate
+            }} × 10% on rest
+          </p>
+          {% else %}
+          <p class="font-black text-blue-800 text-sm mb-1">Recurring Month Payment — Platform 10% Only</p>
+          <p class="text-xs text-blue-700">
+            First month broker fee already covered. Only 10% platform charge applies to the full amount.
+          </p>
+          <div class="mt-2 flex gap-3 text-xs">
+            <span class="bg-green-100 text-green-700 font-bold px-3 py-1 rounded-full">Broker: ৳0</span>
+            <span class="bg-blue-100 text-blue-700 font-bold px-3 py-1 rounded-full">Platform: 10%</span>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% else %}
+    <!-- ── Commission Explainer ── -->
+    <div
+      class="rounded-2xl border-2 {% if not first_month_covered %}border-violet-200 bg-violet-50{% else %}border-blue-100 bg-blue-50{% endif %} p-5">
+      <div class="flex items-start gap-3">
+        <span
+          class="material-symbols-outlined {% if not first_month_covered %}text-violet-600{% else %}text-blue-600{% endif %} text-2xl mt-0.5">info</span>
+        <div class="flex-1">
+          {% if not first_month_covered %}
+          <p class="font-black text-violet-800 text-sm mb-2">First Month Covered by This Payment</p>
+          <div class="text-xs text-violet-700 space-y-1">
+            <div class="flex justify-between"><span>Monthly rate</span><strong>৳{{ monthly_rate }}</strong></div>
+            <div class="flex justify-between"><span>First month: broker (40%) + platform (10%)</span><strong
+                class="text-red-600">50% = ৳{{ preview_first_commission }}</strong></div>
+            <div class="flex justify-between"><span>Any remaining amount in payment</span><strong
+                class="text-orange-600">10% platform</strong></div>
+          </div>
+          <p class="text-xs text-violet-600 mt-2 bg-violet-100 rounded-lg px-3 py-1.5">
+            e.g. Pay ৳{{ monthly_rate|add:monthly_rate }} → ৳{{ preview_first_commission }} (1st mo.) + ৳{{ monthly_rate
+            }} × 10% on rest
+          </p>
+          {% else %}
+          <p class="font-black text-blue-800 text-sm mb-1">Recurring Month Payment — Platform 10% Only</p>
+          <p class="text-xs text-blue-700">
+            First month broker fee already covered. Only 10% platform charge applies to the full amount.
+          </p>
+          <div class="mt-2 flex gap-3 text-xs">
+            <span class="bg-green-100 text-green-700 font-bold px-3 py-1 rounded-full">Broker: ৳0</span>
+            <span class="bg-blue-100 text-blue-700 font-bold px-3 py-1 rounded-full">Platform: 10%</span>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Payment Form ── -->
+    <form method="POST" action="/payments/create/?booking_id={{ booking.id }}" class="space-y-5">
+      {% csrf_token %}
+
+      <!-- Amount -->
+      <div class="bg-white rounded-2xl border border-outline/10 shadow-sm p-6">
+        <h3 class="font-bold text-base mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined text-indigo-500">currency_rupee</span> Payment Amount
+        </h3>
+        <div class="relative">
+          <span class="absolute left-4 top-1/2 -translate-y-1/2 font-black text-indigo-600 text-lg">৳</span>
+          <input type="number" name="amount" id="amount-input" step="0.01" min="1" max="{{ balance_due }}"
+            value="{{ balance_due }}"
+            class="w-full pl-9 pr-4 py-4 bg-surface-low border-2 border-outline/30 rounded-xl text-xl font-black focus:border-indigo-500 focus:bg-white outline-none transition-all"
+            placeholder="Enter amount" oninput="updatePreview(this.value)">
+        </div>
+        <!-- Live preview -->
+        <div class="mt-3 grid grid-cols-3 gap-3 text-center">
+          <div class="bg-red-50 border border-red-100 rounded-xl p-3">
+            <p class="text-xs text-red-500 font-bold uppercase">Commission</p>
+            <p class="text-lg font-black text-red-700" id="prev-commission">৳{{ preview_commission|default:"—" }}</p>
+          </div>
+          <div class="bg-green-50 border border-green-100 rounded-xl p-3">
+            <p class="text-xs text-green-500 font-bold uppercase">Tutor Gets</p>
+            <p class="text-lg font-black text-green-700" id="prev-tutor">৳—</p>
+          </div>
+          <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-3">
+            <p class="text-xs text-indigo-500 font-bold uppercase">Balance After</p>
+            <p class="text-lg font-black text-indigo-700" id="prev-balance">৳{{ balance_due }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Method -->
+      <div class="bg-white rounded-2xl border border-outline/10 shadow-sm p-6">
+        <h3 class="font-bold text-base mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined text-indigo-500">account_balance_wallet</span> Payment Method
+        </h3>
+        <div class="grid grid-cols-3 gap-3">
+          {% for val, label in payment_methods %}
+          <label class="relative cursor-pointer">
+            <input type="radio" name="payment_method" value="{{ val }}" class="peer sr-only" {% if forloop.first %}checked{% endif %}>
+            <div
+              class="peer-checked:border-indigo-500 peer-checked:bg-indigo-50 border-2 border-outline/30 rounded-xl p-4 text-center transition-all hover:border-indigo-300">
+              {% if val == 'bkash' %}
+              <img src="{% static 'icon/bkash.png' %}" alt="bKash" class="h-8 w-auto mx-auto mb-1 object-contain">
+              {% elif val == 'nagad' %}
+              <img src="{% static 'icon/nagad.png' %}" alt="Nagad" class="h-8 w-auto mx-auto mb-1 object-contain">
+              {% else %}
+              <img src="{% static 'icon/rocket.png' %}" alt="Rocket" class="h-8 w-auto mx-auto mb-1 object-contain">
+              {% endif %}
+              <p class="font-bold text-sm">{{ label }}</p>
+            </div>
+            <div
+              class="peer-checked:flex hidden absolute top-2 right-2 w-5 h-5 grad rounded-full items-center justify-center">
+              <span class="material-symbols-outlined text-white text-xs">check</span>
+            </div>
+          </label>
+          {% endfor %}
+        </div>
+
+        <!-- Recipient Number Notice -->
+        <div class="mt-4 flex items-center gap-4 bg-green-50 border border-green-200 rounded-2xl px-5 py-4">
+          <span class="material-symbols-outlined text-green-600 text-3xl flex-shrink-0" style="font-variation-settings:'FILL' 1;">send_money</span>
+          <div class="flex-1 min-w-0">
+            <p class="text-xs font-bold text-green-700 uppercase tracking-wider mb-0.5">Send Payment To</p>
+            <p class="text-xl font-black text-green-800 tracking-widest">01629-018711</p>
+            <p class="text-xs text-green-600 mt-0.5">Send the exact amount to this number, then enter your transaction ID below.</p>
+          </div>
+          <button type="button" onclick="navigator.clipboard.writeText('01629018711').then(()=>{ this.textContent='Copied!'; setTimeout(()=>this.textContent='Copy',1500) })"
+            class="flex-shrink-0 px-4 py-2 bg-green-100 hover:bg-green-200 text-green-700 font-bold rounded-xl text-sm transition-all">
+            Copy
+          </button>
+        </div>
+      </div>
+
+      <!-- Transaction Details -->
+      <div class="bg-white rounded-2xl border border-outline/10 shadow-sm p-6">
+        <h3 class="font-bold text-base mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined text-indigo-500">receipt_long</span> Transaction Details
+        </h3>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-on-muted mb-2">Your Sender
+              Number</label>
+            <div class="relative">
+              <span
+                class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">phone</span>
+              <input type="text" name="sender_number" placeholder="01XXXXXXXXX"
+                class="w-full pl-11 pr-4 py-3 bg-surface-low border-2 border-outline/30 rounded-xl text-sm font-semibold focus:border-indigo-500 focus:bg-white outline-none transition-all">
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-on-muted mb-2">Transaction ID</label>
+            <div class="relative">
+              <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">tag</span>
+              <input type="text" name="transaction_id" placeholder="TXN ID from your app"
+                class="w-full pl-11 pr-4 py-3 bg-surface-low border-2 border-outline/30 rounded-xl text-sm font-semibold focus:border-indigo-500 focus:bg-white outline-none transition-all">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button type="submit"
+        class="w-full py-4 grad text-white font-black rounded-2xl text-lg hover:opacity-90 active:scale-95 transition-all shadow-xl shadow-primary/30">
+        Submit Payment
+      </button>
+    </form>
+    {% endif %}{# end pending_payment check #}
+
+    <!-- ── Payment History (always visible) ── -->
+    {% if all_payments %}
+    <div class="bg-white rounded-2xl border border-outline/10 shadow-sm p-6">
+      <h3 class="font-bold text-base mb-4 flex items-center gap-2">
+        <span class="material-symbols-outlined text-indigo-500">history</span> Payment History
+      </h3>
+      <div class="space-y-3">
+        {% for p in all_payments %}
+        <div class="flex items-center justify-between p-4 rounded-xl
+        {% if p.status == 'approved' %}bg-green-50 border border-green-100
+        {% elif p.status == 'rejected' %}bg-red-50 border border-red-100
+        {% else %}bg-amber-50 border border-amber-100{% endif %}">
+          <div class="flex items-center gap-3">
+            <div
+              class="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0 bg-surface-low flex items-center justify-center">
+              {% if p.payment_method == 'bkash' %}
+              <img src="{% static 'icon/bkash.png' %}" alt="bKash" class="w-full h-full object-contain p-1">
+              {% elif p.payment_method == 'nagad' %}
+              <img src="{% static 'icon/nagad.png' %}" alt="Nagad" class="w-full h-full object-contain p-1">
+              {% else %}
+              <img src="{% static 'icon/rocket.png' %}" alt="Rocket" class="w-full h-full object-contain p-1">
+              {% endif %}
+            </div>
+            <div>
+              <p class="font-bold text-sm flex items-center gap-1.5">
+                ৳{{ p.amount }}
+                {% if p.is_first_payment %}
+                <span class="text-xs bg-violet-100 text-violet-700 px-2 py-0.5 rounded-full font-bold">1st · 50%</span>
+                {% else %}
+                <span class="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full font-bold">Recurring ·
+                  10%</span>
+                {% endif %}
+              </p>
+              <p class="text-xs text-on-muted">{{ p.created_at|date:"M d, Y" }} · Commission: <span
+                  class="font-bold text-violet-600">৳{{ p.commission }}</span> · Tutor: <span
+                  class="font-bold text-green-600">৳{{ p.tutor_income }}</span></p>
+            </div>
+          </div>
+          <span class="text-xs font-black px-3 py-1.5 rounded-full
+          {% if p.status == 'approved' %}bg-green-100 text-green-700
+          {% elif p.status == 'rejected' %}bg-red-100 text-red-700
+          {% else %}bg-amber-100 text-amber-700{% endif %}">
+            {{ p.get_status_display }}
+          </span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+  {% endblock %}
+
+  {% block extra_js %}
+  <script>
+    const firstMonthCovered = {{ first_month_covered|yesno:"true,false" }};
+
+    const monthlyRate = {{ monthly_rate }};
+    const balanceDue = {{ balance_due }};
+
+    function updatePreview(val) {
+      const amount = parseFloat(val) || 0;
+      let commission = 0;
+
+      if (!firstMonthCovered) {
+        // First portion up to monthlyRate: 50%
+        const firstPortion = Math.min(amount, monthlyRate);
+        const firstCommission = firstPortion * 0.50;
+        // Rest: 10%
+        const excess = Math.max(0, amount - monthlyRate);
+        const excessCommission = excess * 0.10;
+        commission = firstCommission + excessCommission;
+      } else {
+        commission = amount * 0.10;
+      }
+
+      commission = Math.min(commission, amount);
+      const tutorGets = amount - commission;
+      const balanceAfter = Math.max(0, balanceDue - amount);
+
+      document.getElementById('prev-commission').textContent = '৳' + commission.toFixed(2);
+      document.getElementById('prev-tutor').textContent = '৳' + tutorGets.toFixed(2);
+      document.getElementById('prev-balance').textContent = '৳' + balanceAfter.toFixed(2);
+    }
+
+    const amtInput = document.getElementById('amount-input');
+    if (amtInput) updatePreview(amtInput.value);
+  </script>
+  {% endblock %}

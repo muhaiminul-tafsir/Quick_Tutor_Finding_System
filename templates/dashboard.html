@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Dashboard | QuickTutor</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+tailwind.config = {
+  theme: { extend: {
+    fontFamily: { sans: ['Inter','sans-serif'] },
+    colors: {
+      primary:'#3525cd','primary-dark':'#2518a8',
+      surface:'#f9f9ff','surface-low':'#f1f3ff','surface-high':'#e1e8fd',
+      'on-surface':'#141b2b','on-muted':'#464555',
+      outline:'#c7c4d8'
+    }
+  }}
+}
+</script>
+<style>
+body{font-family:'Inter',sans-serif;}
+.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}
+.grad{background:linear-gradient(135deg,#3525cd 0%,#4f46e5 100%);}
+.hide-scroll::-webkit-scrollbar{display:none;}
+.hide-scroll{-ms-overflow-style:none;scrollbar-width:none;}
+</style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen">
+
+<div class="flex min-h-screen">
+
+<!-- Sidebar -->
+<aside class="hidden md:flex h-screen w-64 flex-col p-6 space-y-6 bg-surface-low sticky top-0 border-r border-outline/30">
+  <div class="flex items-center gap-3 px-2">
+    <div class="w-8 h-8 rounded-lg grad flex items-center justify-center text-white">
+      <span class="material-symbols-outlined text-sm">school</span>
+    </div>
+    <span class="text-lg font-bold text-indigo-900">QuickTutor</span>
+  </div>
+
+  <nav class="space-y-1 flex-1">
+    <a href="/dashboard/" class="flex items-center gap-3 px-4 py-3 bg-white text-indigo-700 rounded-xl shadow-sm text-sm font-semibold">
+      <span class="material-symbols-outlined">dashboard</span> Dashboard
+    </a>
+    {% if user.role == 'student' %}
+    <a href="/tutors/" class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-indigo-600 hover:bg-white/60 rounded-xl text-sm font-semibold transition-all hover:translate-x-1">
+      <span class="material-symbols-outlined">search</span> Find Tutors
+    </a>
+    <a href="/bookings/" class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-indigo-600 hover:bg-white/60 rounded-xl text-sm font-semibold transition-all hover:translate-x-1">
+      <span class="material-symbols-outlined">menu_book</span> My Bookings
+    </a>
+    <a href="/payments/" class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-indigo-600 hover:bg-white/60 rounded-xl text-sm font-semibold transition-all hover:translate-x-1">
+      <span class="material-symbols-outlined">payments</span> Payments
+    </a>
+    {% else %}
+    <a href="/bookings/" class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-indigo-600 hover:bg-white/60 rounded-xl text-sm font-semibold transition-all hover:translate-x-1">
+      <span class="material-symbols-outlined">groups</span> My Students
+    </a>
+    <a href="/tutors/edit-profile/" class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-indigo-600 hover:bg-white/60 rounded-xl text-sm font-semibold transition-all hover:translate-x-1">
+      <span class="material-symbols-outlined">manage_accounts</span> My Profile
+    </a>
+    {% endif %}
+    <a href="/accounts/profile/" class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-indigo-600 hover:bg-white/60 rounded-xl text-sm font-semibold transition-all hover:translate-x-1">
+      <span class="material-symbols-outlined">settings</span> Settings
+    </a>
+  </nav>
+
+  <div class="border-t border-outline/20 pt-4 space-y-3">
+    <div class="flex items-center gap-3 px-3">
+      <div class="w-10 h-10 rounded-full grad flex items-center justify-center text-white font-bold text-sm">
+        {{ user.username|upper|first }}
+      </div>
+      <div>
+        <p class="text-sm font-bold">{{ user.get_full_name|default:user.username }}</p>
+        <p class="text-xs text-on-muted capitalize">{{ user.role }}</p>
+      </div>
+    </div>
+    <a href="/accounts/logout/" class="flex items-center gap-3 px-4 py-2 text-slate-500 hover:text-red-500 text-sm font-semibold rounded-xl transition-all">
+      <span class="material-symbols-outlined">logout</span> Logout
+    </a>
+  </div>
+</aside>
+
+<!-- Main -->
+<main class="flex-1 min-h-screen overflow-y-auto">
+
+  <!-- Topbar -->
+  <header class="sticky top-0 z-50 bg-surface/80 backdrop-blur border-b border-outline/20 flex items-center justify-between px-8 py-4">
+    <h1 class="text-lg font-bold text-on-surface">
+      {% if user.role == 'student' %}Student Dashboard{% else %}Tutor Dashboard{% endif %}
+    </h1>
+    <div class="flex items-center gap-3">
+      {% if user.role == 'student' %}
+      <a href="/tutors/" class="px-5 py-2 grad text-white font-bold rounded-full text-sm shadow-lg hover:opacity-90 transition-all">
+        Find a Tutor
+      </a>
+      {% else %}
+      <a href="/bookings/" class="px-5 py-2 grad text-white font-bold rounded-full text-sm shadow-lg hover:opacity-90 transition-all">
+        View Students
+      </a>
+      {% endif %}
+      <a href="/accounts/profile/" class="w-9 h-9 grad rounded-full flex items-center justify-center text-white font-bold text-sm">
+        {{ user.username|upper|first }}
+      </a>
+    </div>
+  </header>
+
+  <div class="px-8 py-8 max-w-screen-xl mx-auto space-y-10">
+
+    <!-- Flash messages -->
+    {% if messages %}
+      {% for msg in messages %}
+      <div class="px-5 py-3 rounded-2xl text-sm font-semibold bg-green-50 border border-green-200 text-green-800">{{ msg }}</div>
+      {% endfor %}
+    {% endif %}
+
+    <!-- Hero Banner -->
+    <section class="relative overflow-hidden rounded-3xl p-10 grad text-white">
+      <div class="relative z-10 space-y-3 max-w-xl">
+        <p class="text-indigo-200 text-sm font-semibold uppercase tracking-widest">Welcome back</p>
+        <h2 class="text-4xl font-extrabold tracking-tight">{{ user.get_full_name|default:user.username }}!</h2>
+        {% if user.role == 'student' %}
+        <p class="text-indigo-100 text-base leading-relaxed">You have {{ pending_bookings }} pending booking{% if pending_bookings != 1 %}s{% endif %} and {{ approved_bookings }} confirmed session{% if approved_bookings != 1 %}s{% endif %}.</p>
+        <div class="flex gap-3 pt-2">
+          <a href="/tutors/" class="bg-white text-primary px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-surface transition-all shadow-xl">Find Tutor</a>
+          <a href="/bookings/" class="bg-white/20 border border-white/30 px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-white/30 transition-all">My Bookings</a>
+        </div>
+        {% else %}
+        <p class="text-indigo-100 text-base leading-relaxed">You have {{ pending_bookings }} pending request{% if pending_bookings != 1 %}s{% endif %} waiting for your response.</p>
+        <div class="flex gap-3 pt-2">
+          <a href="/bookings/" class="bg-white text-primary px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-surface transition-all shadow-xl">View Students</a>
+          <a href="/tutors/edit-profile/" class="bg-white/20 border border-white/30 px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-white/30 transition-all">Edit Profile</a>
+        </div>
+        {% endif %}
+      </div>
+      <div class="absolute right-[-5%] top-[-20%] w-80 h-80 bg-white/10 rounded-full blur-[80px]"></div>
+      <div class="absolute right-10 bottom-[-5%] opacity-10 hidden md:block">
+        <span class="material-symbols-outlined" style="font-size:12rem;">{% if user.role == 'student' %}auto_stories{% else %}school{% endif %}</span>
+      </div>
+    </section>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-5">
+      {% if user.role == 'student' %}
+      <div class="bg-white p-6 rounded-2xl border border-outline/10 shadow-sm hover:-translate-y-1 transition-transform">
+        <div class="w-11 h-11 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600 mb-4">
+          <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">book_online</span>
+        </div>
+        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Bookings</p>
+        <h3 class="text-3xl font-black text-on-surface mt-1">{{ total_bookings }}</h3>
+        <div class="mt-3 h-1.5 bg-indigo-50 rounded-full"><div class="h-full bg-indigo-500 rounded-full" style="width:{% if total_bookings %}60{% else %}0{% endif %}%"></div></div>
+      </div>
+      <div class="bg-white p-6 rounded-2xl border border-outline/10 shadow-sm hover:-translate-y-1 transition-transform">
+        <div class="w-11 h-11 rounded-2xl bg-green-50 flex items-center justify-center text-green-600 mb-4">
+          <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">check_circle</span>
+        </div>
+        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Completed</p>
+        <h3 class="text-3xl font-black text-on-surface mt-1">{{ completed_bookings }}</h3>
+        <div class="mt-3 h-1.5 bg-green-50 rounded-full"><div class="h-full bg-green-500 rounded-full" style="width:{% if total_bookings and completed_bookings %}{{ completed_bookings|floatformat:0 }}{% else %}0{% endif %}%"></div></div>
+      </div>
+      <div class="bg-white p-6 rounded-2xl border border-outline/10 shadow-sm hover:-translate-y-1 transition-transform">
+        <div class="w-11 h-11 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-600 mb-4">
+          <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">star</span>
+        </div>
+        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Avg Rating Given</p>
+        <h3 class="text-3xl font-black text-on-surface mt-1">{{ average_rating }}</h3>
+        <div class="mt-3 h-1.5 bg-amber-50 rounded-full"><div class="h-full bg-amber-400 rounded-full" style="width:{{ average_rating|floatformat:0 }}0%"></div></div>
+      </div>
+      <div class="bg-white p-6 rounded-2xl border border-outline/10 shadow-sm hover:-translate-y-1 transition-transform">
+        <div class="w-11 h-11 rounded-2xl bg-purple-50 flex items-center justify-center text-purple-600 mb-4">
+          <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">payments</span>
+        </div>
+        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Spent</p>
+        <h3 class="text-2xl font-black text-on-surface mt-1">৳{{ total_spent }}</h3>
+        <div class="mt-3 h-1.5 bg-purple-50 rounded-full"><div class="h-full bg-purple-500 rounded-full w-3/4"></div></div>
+      </div>
+      {% else %}
+      <div class="bg-white p-6 rounded-2xl border border-outline/10 shadow-sm hover:-translate-y-1 transition-transform">
+        <div class="w-11 h-11 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600 mb-4">
+          <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">groups</span>
+        </div>
+        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Students</p>
+        <h3 class="text-3xl font-black text-on-surface mt-1">{{ total_students }}</h3>
+        <div class="mt-3 h-1.5 bg-indigo-50 rounded-full"><div class="h-full bg-indigo-500 rounded-full w-3/5"></div></div>
+      </div>
+      <div class="bg-white p-6 rounded-2xl border border-outline/10 shadow-sm hover:-translate-y-1 transition-transform">
+        <div class="w-11 h-11 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-600 mb-4">
+          <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">pending</span>
+        </div>
+        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Pending</p>
+        <h3 class="text-3xl font-black text-on-surface mt-1">{{ pending_bookings }}</h3>
+        <div class="mt-3 h-1.5 bg-amber-50 rounded-full"><div class="h-full bg-amber-400 rounded-full w-2/5"></div></div>
+      </div>
+      <div class="bg-white p-6 rounded-2xl border border-outline/10 shadow-sm hover:-translate-y-1 transition-transform">
+        <div class="w-11 h-11 rounded-2xl bg-green-50 flex items-center justify-center text-green-600 mb-4">
+          <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">star</span>
+        </div>
+        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Your Rating</p>
+        <h3 class="text-3xl font-black text-on-surface mt-1">{{ rating }}<span class="text-base text-slate-400">/5</span></h3>
+        <div class="mt-3 h-1.5 bg-green-50 rounded-full"><div class="h-full bg-green-500 rounded-full" style="width:{{ rating }}0%"></div></div>
+      </div>
+      <div class="bg-white p-6 rounded-2xl border border-outline/10 shadow-sm hover:-translate-y-1 transition-transform">
+        <div class="w-11 h-11 rounded-2xl bg-purple-50 flex items-center justify-center text-purple-600 mb-4">
+          <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">payments</span>
+        </div>
+        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Earned</p>
+        <h3 class="text-2xl font-black text-on-surface mt-1">৳{{ total_earned }}</h3>
+        <div class="mt-3 h-1.5 bg-purple-50 rounded-full"><div class="h-full bg-purple-500 rounded-full w-3/4"></div></div>
+      </div>
+      {% endif %}
+    </div>
+
+    {% if user.role == 'student' %}
+    <!-- Recent Bookings -->
+    <section>
+      <div class="flex justify-between items-end mb-5">
+        <div>
+          <h2 class="text-xl font-bold text-on-surface">Recent Bookings</h2>
+          <p class="text-sm text-on-muted">Your latest session requests</p>
+        </div>
+        <a href="/bookings/" class="text-sm font-bold text-indigo-600 hover:underline">View All</a>
+      </div>
+      {% if recent_bookings %}
+      <div class="flex gap-5 overflow-x-auto pb-3 hide-scroll -mx-2 px-2">
+        {% for booking in recent_bookings %}
+        <div class="min-w-[280px] bg-white p-5 rounded-2xl border border-outline/10 shadow-sm hover:shadow-md transition-shadow">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-12 h-12 rounded-2xl grad flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
+              {{ booking.tutor.username|upper|first }}
+            </div>
+            <div>
+              <h4 class="font-bold text-sm text-on-surface">{{ booking.tutor.get_full_name|default:booking.tutor.username }}</h4>
+              <p class="text-xs text-on-muted">
+                {% if booking.tutor.tutor_profile %}{{ booking.tutor.tutor_profile.subject }}{% endif %}
+              </p>
+            </div>
+          </div>
+          <div class="flex items-center justify-between text-xs py-3 border-t border-surface-low">
+            <div class="flex items-center gap-1 text-slate-500">
+              <span class="material-symbols-outlined text-base">calendar_today</span>
+              {{ booking.date|date:'M d, Y' }}
+            </div>
+            <span class="px-2 py-1 rounded-full text-xs font-bold
+              {% if booking.status == 'confirmed' %}bg-green-100 text-green-700
+              {% elif booking.status == 'pending' %}bg-yellow-100 text-yellow-700
+              {% elif booking.status == 'rejected' %}bg-red-100 text-red-700
+              {% else %}bg-gray-100 text-gray-600{% endif %}">
+              {{ booking.get_status_display }}
+            </span>
+          </div>
+          {% if booking.payment %}
+          <div class="mt-1 flex items-center justify-between text-xs text-slate-400">
+            <span>Payment</span>
+            <span class="font-bold
+              {% if booking.payment.status == 'approved' %}text-green-600
+              {% elif booking.payment.status == 'pending' %}text-yellow-600
+              {% else %}text-red-500{% endif %}">
+              {{ booking.payment.get_status_display }}
+            </span>
+          </div>
+          {% endif %}
+          <a href="/bookings/{{ booking.id }}/" class="mt-4 w-full py-2.5 block text-center bg-surface-low hover:bg-indigo-600 hover:text-white transition-all rounded-xl font-bold text-sm text-on-surface">
+            View Details
+          </a>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="bg-white rounded-2xl p-12 text-center border border-outline/10">
+        <span class="material-symbols-outlined text-5xl text-slate-300 mb-3 block">book_online</span>
+        <p class="text-slate-400 font-semibold">No bookings yet.</p>
+        <a href="/tutors/" class="mt-4 inline-block px-6 py-2.5 grad text-white font-bold rounded-xl text-sm">Find a Tutor</a>
+      </div>
+      {% endif %}
+    </section>
+
+    <!-- Recent Tutors -->
+    <section>
+      <div class="flex justify-between items-end mb-5">
+        <h2 class="text-xl font-bold text-on-surface">Your Tutors</h2>
+        <a href="/tutors/" class="text-sm font-bold text-indigo-600 hover:underline">Browse All</a>
+      </div>
+      {% if recent_tutors %}
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for tutor in recent_tutors %}
+        <a href="/tutors/{{ tutor.id }}/" class="bg-surface-low p-4 rounded-2xl flex items-center gap-4 hover:bg-surface-high transition-colors group">
+          <div class="w-12 h-12 rounded-xl grad flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
+            {{ tutor.username|upper|first }}
+          </div>
+          <div class="flex-1 min-w-0">
+            <h5 class="font-bold text-sm truncate">{{ tutor.get_full_name|default:tutor.username }}</h5>
+            <p class="text-xs text-on-muted">{% if tutor.tutor_profile %}{{ tutor.tutor_profile.subject }}{% endif %}</p>
+          </div>
+          <span class="material-symbols-outlined text-slate-300 group-hover:text-indigo-500 transition-colors text-base">arrow_forward_ios</span>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="bg-white rounded-2xl p-8 text-center border border-outline/10">
+        <p class="text-slate-400 font-semibold">Book a session to see your tutors here.</p>
+      </div>
+      {% endif %}
+    </section>
+
+    {% else %}
+    <!-- Tutor: Recent Students -->
+    <section>
+      <div class="flex justify-between items-end mb-5">
+        <div>
+          <h2 class="text-xl font-bold text-on-surface">Recent Students</h2>
+          <p class="text-sm text-on-muted">Students who booked sessions with you</p>
+        </div>
+        <a href="/bookings/" class="text-sm font-bold text-indigo-600 hover:underline">View All</a>
+      </div>
+      {% if recent_students %}
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for booking in recent_students %}
+        <a href="/bookings/{{ booking.id }}/" class="bg-white p-5 rounded-2xl border border-outline/10 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all group">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-11 h-11 rounded-xl grad flex items-center justify-center text-white font-bold flex-shrink-0">
+              {{ booking.student.username|upper|first }}
+            </div>
+            <div>
+              <h5 class="font-bold text-sm">{{ booking.student.get_full_name|default:booking.student.username }}</h5>
+              <p class="text-xs text-on-muted">{{ booking.date|date:'M d, Y' }} · {{ booking.months }}mo</p>
+            </div>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="px-2 py-1 rounded-full text-xs font-bold
+              {% if booking.status == 'confirmed' %}bg-green-100 text-green-700
+              {% elif booking.status == 'pending' %}bg-yellow-100 text-yellow-700
+              {% else %}bg-gray-100 text-gray-600{% endif %}">
+              {{ booking.get_status_display }}
+            </span>
+            {% if booking.payment %}
+            <span class="text-xs font-bold
+              {% if booking.payment.status == 'approved' %}text-green-600{% else %}text-yellow-600{% endif %}">
+              ৳{{ booking.payment.amount }}
+            </span>
+            {% endif %}
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="bg-white rounded-2xl p-12 text-center border border-outline/10">
+        <span class="material-symbols-outlined text-5xl text-slate-300 mb-3 block">groups</span>
+        <p class="text-slate-400 font-semibold">No students yet. Complete your profile to attract bookings.</p>
+        <a href="/tutors/edit-profile/" class="mt-4 inline-block px-6 py-2.5 grad text-white font-bold rounded-xl text-sm">Edit Profile</a>
+      </div>
+      {% endif %}
+    </section>
+    {% endif %}
+
+  </div>
+</main>
+</div>
+
+<!-- Mobile Nav -->
+<nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur border-t border-outline/20 px-6 py-3 flex justify-around items-center z-50">
+  <a href="/dashboard/" class="flex flex-col items-center gap-1 text-indigo-600">
+    <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">dashboard</span>
+    <span class="text-[10px] font-bold">Home</span>
+  </a>
+  {% if user.role == 'student' %}
+  <a href="/bookings/" class="flex flex-col items-center gap-1 text-slate-400">
+    <span class="material-symbols-outlined">menu_book</span>
+    <span class="text-[10px] font-bold">Bookings</span>
+  </a>
+  <a href="/tutors/" class="flex flex-col items-center -mt-8">
+    <div class="w-12 h-12 grad rounded-full flex items-center justify-center text-white shadow-lg">
+      <span class="material-symbols-outlined">search</span>
+    </div>
+  </a>
+  <a href="/payments/" class="flex flex-col items-center gap-1 text-slate-400">
+    <span class="material-symbols-outlined">payments</span>
+    <span class="text-[10px] font-bold">Payments</span>
+  </a>
+  {% else %}
+  <a href="/bookings/" class="flex flex-col items-center gap-1 text-slate-400">
+    <span class="material-symbols-outlined">groups</span>
+    <span class="text-[10px] font-bold">Students</span>
+  </a>
+  <a href="/tutors/edit-profile/" class="flex flex-col items-center -mt-8">
+    <div class="w-12 h-12 grad rounded-full flex items-center justify-center text-white shadow-lg">
+      <span class="material-symbols-outlined">edit</span>
+    </div>
+  </a>
+  {% endif %}
+  <a href="/accounts/profile/" class="flex flex-col items-center gap-1 text-slate-400">
+    <span class="material-symbols-outlined">person</span>
+    <span class="text-[10px] font-bold">Profile</span>
+  </a>
+</nav>
+
+</body>
+</html>

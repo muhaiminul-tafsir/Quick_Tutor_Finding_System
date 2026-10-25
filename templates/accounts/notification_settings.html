@@ -1,0 +1,142 @@
+{% extends 'base/luminary_base.html' %}
+{% block title %}Notification Settings | QuickTutor{% endblock %}
+{% block page_title %}Notifications{% endblock %}
+{% block nav_profile %}bg-white text-indigo-700 shadow-sm{% endblock %}
+{% block mob_profile %}text-indigo-600{% endblock %}
+{% block topbar_action %}
+<a href="/accounts/profile/" class="px-4 py-2 bg-surface-low hover:bg-surface-high font-bold rounded-xl text-sm transition-all flex items-center gap-1">
+  <span class="material-symbols-outlined text-base">arrow_back</span> Profile
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-lg mx-auto">
+  <div class="mb-6">
+    <h2 class="text-2xl font-black text-on-surface">Notification Settings</h2>
+    <p class="text-sm text-on-muted mt-1">Choose what notifications you'd like to receive.</p>
+  </div>
+
+  {% if messages %}
+    {% for msg in messages %}
+    <div class="mb-5 px-5 py-3 rounded-2xl text-sm font-semibold
+      {% if 'error' in msg.tags %}bg-red-50 border border-red-200 text-red-800
+      {% else %}bg-green-50 border border-green-200 text-green-800{% endif %}">
+      {{ msg }}
+    </div>
+    {% endfor %}
+  {% endif %}
+
+  <form method="POST" action="/accounts/notification-settings/" class="space-y-5">
+    {% csrf_token %}
+
+    <!-- Booking Notifications -->
+    <div class="bg-white rounded-2xl border border-outline/10 shadow-sm p-6">
+      <h3 class="font-bold text-base mb-5 flex items-center gap-2">
+        <span class="material-symbols-outlined text-indigo-500">book_online</span> Booking Notifications
+      </h3>
+      <div class="space-y-4">
+        {% for label, name in booking_notifs %}
+        <label class="flex items-center justify-between cursor-pointer group">
+          <div>
+            <p class="text-sm font-semibold text-on-surface group-hover:text-indigo-600 transition-colors">{{ label }}</p>
+          </div>
+          <div class="relative">
+            <input type="checkbox" name="{{ name }}" class="sr-only peer" checked>
+            <div class="w-11 h-6 bg-surface-high rounded-full peer peer-checked:bg-indigo-500 transition-colors"></div>
+            <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform peer-checked:translate-x-5"></div>
+          </div>
+        </label>
+        {% empty %}
+        <!-- Default toggles since no DB model yet -->
+        <label class="flex items-center justify-between cursor-pointer group">
+          <p class="text-sm font-semibold text-on-surface group-hover:text-indigo-600 transition-colors">New booking requests</p>
+          <div class="relative">
+            <input type="checkbox" name="notif_booking_request" class="sr-only peer" checked>
+            <div class="w-11 h-6 bg-surface-high rounded-full peer peer-checked:bg-indigo-500 transition-colors"></div>
+            <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform peer-checked:translate-x-5"></div>
+          </div>
+        </label>
+        <label class="flex items-center justify-between cursor-pointer group">
+          <p class="text-sm font-semibold text-on-surface group-hover:text-indigo-600 transition-colors">Booking status updates</p>
+          <div class="relative">
+            <input type="checkbox" name="notif_booking_status" class="sr-only peer" checked>
+            <div class="w-11 h-6 bg-surface-high rounded-full peer peer-checked:bg-indigo-500 transition-colors"></div>
+            <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform peer-checked:translate-x-5"></div>
+          </div>
+        </label>
+        <label class="flex items-center justify-between cursor-pointer group">
+          <p class="text-sm font-semibold text-on-surface group-hover:text-indigo-600 transition-colors">Session reminders</p>
+          <div class="relative">
+            <input type="checkbox" name="notif_booking_reminder" class="sr-only peer">
+            <div class="w-11 h-6 bg-surface-high rounded-full peer peer-checked:bg-indigo-500 transition-colors"></div>
+            <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform peer-checked:translate-x-5"></div>
+          </div>
+        </label>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Payment Notifications -->
+    <div class="bg-white rounded-2xl border border-outline/10 shadow-sm p-6">
+      <h3 class="font-bold text-base mb-5 flex items-center gap-2">
+        <span class="material-symbols-outlined text-green-500">payments</span> Payment Notifications
+      </h3>
+      <div class="space-y-4">
+        <label class="flex items-center justify-between cursor-pointer group">
+          <p class="text-sm font-semibold text-on-surface group-hover:text-indigo-600 transition-colors">Payment received</p>
+          <div class="relative">
+            <input type="checkbox" name="notif_payment_received" class="sr-only peer" checked>
+            <div class="w-11 h-6 bg-surface-high rounded-full peer peer-checked:bg-indigo-500 transition-colors"></div>
+            <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform peer-checked:translate-x-5"></div>
+          </div>
+        </label>
+        <label class="flex items-center justify-between cursor-pointer group">
+          <p class="text-sm font-semibold text-on-surface group-hover:text-indigo-600 transition-colors">Payment due reminders</p>
+          <div class="relative">
+            <input type="checkbox" name="notif_payment_due" class="sr-only peer" checked>
+            <div class="w-11 h-6 bg-surface-high rounded-full peer peer-checked:bg-indigo-500 transition-colors"></div>
+            <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform peer-checked:translate-x-5"></div>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <!-- Review Notifications -->
+    <div class="bg-white rounded-2xl border border-outline/10 shadow-sm p-6">
+      <h3 class="font-bold text-base mb-5 flex items-center gap-2">
+        <span class="material-symbols-outlined text-amber-500">star_rate</span> Review Notifications
+      </h3>
+      <div class="space-y-4">
+        <label class="flex items-center justify-between cursor-pointer group">
+          <p class="text-sm font-semibold text-on-surface group-hover:text-indigo-600 transition-colors">New review received</p>
+          <div class="relative">
+            <input type="checkbox" name="notif_review" class="sr-only peer" checked>
+            <div class="w-11 h-6 bg-surface-high rounded-full peer peer-checked:bg-indigo-500 transition-colors"></div>
+            <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform peer-checked:translate-x-5"></div>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <div class="flex gap-3 pt-2">
+      <button type="submit" class="flex-1 py-4 grad text-white font-black rounded-xl text-base hover:opacity-90 transition-all shadow-lg shadow-primary/30 active:scale-95">
+        Save Preferences
+      </button>
+      <a href="/accounts/profile/" class="px-8 py-4 bg-surface-high text-on-surface font-bold rounded-xl text-base hover:bg-outline/20 transition-all text-center">
+        Cancel
+      </a>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+/* Fix toggle visual — sync the sibling div with the real checkbox state */
+document.querySelectorAll('input[type=checkbox]').forEach(function(cb) {
+  cb.addEventListener('change', function() {
+    /* Tailwind peer classes handle the visual automatically */
+  });
+});
+</script>
+{% endblock %}

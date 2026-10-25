@@ -1,0 +1,196 @@
+{% extends 'base/luminary_base.html' %}
+{% block title %}Admin Panel | QuickTutor{% endblock %}
+{% block page_title %}Admin Overview{% endblock %}
+{% block nav_dashboard %}bg-white text-indigo-700 shadow-sm{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+<!-- Header -->
+<div class="flex items-center gap-4">
+  <div class="w-12 h-12 rounded-2xl grad flex items-center justify-center text-white shadow-lg shadow-primary/30">
+    <span class="material-symbols-outlined">admin_panel_settings</span>
+  </div>
+  <div>
+    <h2 class="text-2xl font-black text-on-surface">Admin Panel</h2>
+    <p class="text-sm text-on-muted">Full platform management — users, bookings, tutors, reviews</p>
+  </div>
+</div>
+
+<!-- Alert badges for pending actions -->
+{% if pending_payments or pending_bookings %}
+<div class="flex gap-3 flex-wrap">
+  {% if pending_payments %}
+  <a href="/payments/manage/?status=pending" class="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2 text-sm font-bold text-amber-700 hover:bg-amber-100 transition-all">
+    <span class="material-symbols-outlined text-base">payments</span>
+    {{ pending_payments }} payment{{ pending_payments|pluralize }} awaiting approval
+    <span class="ml-1 bg-amber-400 text-white text-xs px-2 py-0.5 rounded-full">!</span>
+  </a>
+  {% endif %}
+  {% if pending_bookings %}
+  <a href="/admin-panel/bookings/?status=pending" class="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-xl px-4 py-2 text-sm font-bold text-blue-700 hover:bg-blue-100 transition-all">
+    <span class="material-symbols-outlined text-base">book_online</span>
+    {{ pending_bookings }} booking{{ pending_bookings|pluralize }} pending confirmation
+    <span class="ml-1 bg-blue-400 text-white text-xs px-2 py-0.5 rounded-full">!</span>
+  </a>
+  {% endif %}
+</div>
+{% endif %}
+
+<!-- Stat grid -->
+<div class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-5 gap-4">
+  <div class="bg-white rounded-2xl border border-outline/10 p-5 shadow-sm hover:shadow-md transition-all">
+    <div class="flex items-center justify-between mb-3">
+      <span class="text-xs font-black text-on-muted uppercase tracking-widest">Users</span>
+      <span class="material-symbols-outlined text-indigo-400 text-xl">group</span>
+    </div>
+    <p class="text-3xl font-black text-indigo-700">{{ total_users }}</p>
+    <p class="text-xs text-on-muted mt-1">{{ total_students }} students · {{ total_tutors }} tutors</p>
+  </div>
+  <div class="bg-white rounded-2xl border border-outline/10 p-5 shadow-sm hover:shadow-md transition-all">
+    <div class="flex items-center justify-between mb-3">
+      <span class="text-xs font-black text-on-muted uppercase tracking-widest">Bookings</span>
+      <span class="material-symbols-outlined text-blue-400 text-xl">menu_book</span>
+    </div>
+    <p class="text-3xl font-black text-blue-700">{{ total_bookings }}</p>
+    {% if pending_bookings %}<p class="text-xs text-amber-600 font-bold mt-1">{{ pending_bookings }} pending</p>{% endif %}
+  </div>
+  <div class="bg-white rounded-2xl border border-outline/10 p-5 shadow-sm hover:shadow-md transition-all">
+    <div class="flex items-center justify-between mb-3">
+      <span class="text-xs font-black text-on-muted uppercase tracking-widest">Revenue</span>
+      <span class="material-symbols-outlined text-green-400 text-xl">payments</span>
+    </div>
+    <p class="text-2xl font-black text-green-700">৳{{ total_revenue }}</p>
+    <p class="text-xs text-on-muted mt-1">{{ total_payments }} approved</p>
+  </div>
+  <div class="bg-white rounded-2xl border border-outline/10 p-5 shadow-sm hover:shadow-md transition-all">
+    <div class="flex items-center justify-between mb-3">
+      <span class="text-xs font-black text-on-muted uppercase tracking-widest">Commission</span>
+      <span class="material-symbols-outlined text-violet-400 text-xl">percent</span>
+    </div>
+    <p class="text-2xl font-black text-violet-700">৳{{ total_commission }}</p>
+    <p class="text-xs text-on-muted mt-1">platform earned</p>
+  </div>
+  <div class="bg-white rounded-2xl border border-outline/10 p-5 shadow-sm hover:shadow-md transition-all">
+    <div class="flex items-center justify-between mb-3">
+      <span class="text-xs font-black text-on-muted uppercase tracking-widest">Reviews</span>
+      <span class="material-symbols-outlined text-yellow-400 text-xl">star</span>
+    </div>
+    <p class="text-3xl font-black text-yellow-600">{{ total_reviews }}</p>
+    <p class="text-xs text-on-muted mt-1">total submitted</p>
+  </div>
+</div>
+
+
+<!-- Quick nav -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+  <a href="/admin-panel/users/" class="group bg-white rounded-2xl border border-outline/10 p-5 shadow-sm hover:shadow-lg transition-all hover:-translate-y-0.5 flex flex-col items-center text-center gap-3">
+    <span class="material-symbols-outlined text-3xl text-indigo-500 group-hover:scale-110 transition-transform">manage_accounts</span>
+    <p class="font-bold text-sm">User Management</p>
+    <p class="text-xs text-on-muted">{{ total_users }} users</p>
+  </a>
+  <a href="/admin-panel/bookings/" class="group bg-white rounded-2xl border border-outline/10 p-5 shadow-sm hover:shadow-lg transition-all hover:-translate-y-0.5 flex flex-col items-center text-center gap-3">
+    <span class="material-symbols-outlined text-3xl text-blue-500 group-hover:scale-110 transition-transform">book_online</span>
+    <p class="font-bold text-sm">Booking Management</p>
+    <p class="text-xs text-on-muted">{{ total_bookings }} bookings</p>
+  </a>
+  <a href="/admin-panel/tutors/" class="group bg-white rounded-2xl border border-outline/10 p-5 shadow-sm hover:shadow-lg transition-all hover:-translate-y-0.5 flex flex-col items-center text-center gap-3">
+    <span class="material-symbols-outlined text-3xl text-emerald-500 group-hover:scale-110 transition-transform">school</span>
+    <p class="font-bold text-sm">Tutor Profiles</p>
+    <p class="text-xs text-on-muted">{{ total_tutors }} tutors</p>
+  </a>
+  <a href="/admin-panel/reviews/" class="group bg-white rounded-2xl border border-outline/10 p-5 shadow-sm hover:shadow-lg transition-all hover:-translate-y-0.5 flex flex-col items-center text-center gap-3">
+    <span class="material-symbols-outlined text-3xl text-yellow-500 group-hover:scale-110 transition-transform">star_rate</span>
+    <p class="font-bold text-sm">Review Management</p>
+    <p class="text-xs text-on-muted">{{ total_reviews }} reviews</p>
+  </a>
+</div>
+
+<!-- Bottom 3-col tables -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+  <!-- Recent Users -->
+  <div class="bg-white rounded-2xl border border-outline/10 shadow-sm p-5">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-bold text-sm">Recent Users</h3>
+      <a href="/admin-panel/users/" class="text-xs text-indigo-500 font-bold hover:underline">View all →</a>
+    </div>
+    <div class="space-y-3">
+      {% for u in recent_users %}
+      <a href="/admin-panel/users/{{ u.id }}/" class="flex items-center gap-3 p-2 rounded-xl hover:bg-surface-low transition-all group">
+        <div class="w-8 h-8 rounded-full grad flex items-center justify-center text-white text-xs font-black flex-shrink-0">
+          {{ u.username|first|upper }}
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="font-bold text-sm truncate group-hover:text-indigo-600">{{ u.username }}</p>
+          <p class="text-xs text-on-muted">{{ u.get_role_display|default:u.role }}</p>
+        </div>
+        <span class="text-xs px-2 py-0.5 rounded-full font-bold {% if u.is_active %}bg-green-100 text-green-700{% else %}bg-red-100 text-red-600{% endif %}">
+          {% if u.is_active %}Active{% else %}Inactive{% endif %}
+        </span>
+      </a>
+      {% empty %}
+      <p class="text-sm text-on-muted text-center py-4">No users yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Recent Bookings -->
+  <div class="bg-white rounded-2xl border border-outline/10 shadow-sm p-5">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-bold text-sm">Recent Bookings</h3>
+      <a href="/admin-panel/bookings/" class="text-xs text-indigo-500 font-bold hover:underline">View all →</a>
+    </div>
+    <div class="space-y-3">
+      {% for b in recent_bookings %}
+      <div class="flex items-center gap-3 p-2 rounded-xl hover:bg-surface-low transition-all">
+        <div class="w-8 h-8 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600 flex-shrink-0">
+          <span class="material-symbols-outlined text-sm">menu_book</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="font-bold text-xs truncate">{{ b.student.username }} → {{ b.tutor.username }}</p>
+          <p class="text-xs text-on-muted">{{ b.months }}mo · {{ b.date|date:"M d" }}</p>
+        </div>
+        <span class="text-xs px-2 py-0.5 rounded-full font-bold
+          {% if b.status == 'confirmed' %}bg-green-100 text-green-700
+          {% elif b.status == 'pending' %}bg-amber-100 text-amber-700
+          {% elif b.status == 'rejected' %}bg-red-100 text-red-600
+          {% else %}bg-slate-100 text-slate-600{% endif %}">
+          {{ b.status|capfirst }}
+        </span>
+      </div>
+      {% empty %}
+      <p class="text-sm text-on-muted text-center py-4">No bookings yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Recent Payments -->
+  <div class="bg-white rounded-2xl border border-outline/10 shadow-sm p-5">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-bold text-sm">Recent Payments</h3>
+      <a href="/payments/manage/" class="text-xs text-indigo-500 font-bold hover:underline">View all →</a>
+    </div>
+    <div class="space-y-3">
+      {% for p in recent_payments %}
+      <div class="flex items-center gap-3 p-2 rounded-xl hover:bg-surface-low transition-all">
+        <div class="text-xl">{% if p.payment_method == 'bkash' %}🔴{% elif p.payment_method == 'nagad' %}🟠{% else %}🟣{% endif %}</div>
+        <div class="flex-1 min-w-0">
+          <p class="font-bold text-sm">৳{{ p.amount }}</p>
+          <p class="text-xs text-on-muted truncate">{{ p.booking.student.username }}</p>
+        </div>
+        <span class="text-xs px-2 py-0.5 rounded-full font-bold
+          {% if p.status == 'approved' %}bg-green-100 text-green-700
+          {% elif p.status == 'pending' %}bg-amber-100 text-amber-700
+          {% else %}bg-red-100 text-red-600{% endif %}">
+          {{ p.get_status_display }}
+        </span>
+      </div>
+      {% empty %}
+      <p class="text-sm text-on-muted text-center py-4">No payments yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+</div>
+{% endblock %}

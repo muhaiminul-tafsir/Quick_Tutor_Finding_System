@@ -1,0 +1,35 @@
+{% extends 'base/auth_base.html' %}
+{% block title %}Sign In | QuickTutor{% endblock %}
+{% block auth_title %}Welcome Back{% endblock %}
+{% block auth_subtitle %}Sign in to your account to continue{% endblock %}
+
+{% block content %}
+<form method="POST" action="" class="space-y-5">
+  {% csrf_token %}
+  <div>
+    <label class="block text-xs font-bold text-on-muted uppercase tracking-wider mb-2">Username</label>
+    <div class="relative">
+      <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg">person</span>
+      <input type="text" name="username" required
+        class="w-full pl-11 pr-4 py-3 bg-surface-low border-2 border-outline/30 rounded-xl text-sm font-medium focus:border-indigo-500 focus:bg-white transition-all outline-none"
+        placeholder="Enter your username">
+    </div>
+  </div>
+  <div>
+    <label class="block text-xs font-bold text-on-muted uppercase tracking-wider mb-2">Password</label>
+    <div class="relative">
+      <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg">lock</span>
+      <input type="password" name="password" required
+        class="w-full pl-11 pr-4 py-3 bg-surface-low border-2 border-outline/30 rounded-xl text-sm font-medium focus:border-indigo-500 focus:bg-white transition-all outline-none"
+        placeholder="Enter your password">
+    </div>
+  </div>
+  <button type="submit" class="w-full py-4 grad text-white font-black rounded-xl text-base hover:opacity-90 transition-all shadow-lg shadow-primary/30 active:scale-95 mt-2">
+    Sign In →
+  </button>
+</form>
+{% endblock %}
+
+{% block auth_footer %}
+Don't have an account? <a href="/accounts/register/" class="font-bold text-indigo-600 hover:underline">Register here</a>
+{% endblock %}
